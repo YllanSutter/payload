@@ -11,10 +11,7 @@ export const Sites: CollectionConfig = {
   admin: {
     useAsTitle: 'Titre',
     components: {
-      beforeList: [
-        '/components/admin/GenerateScreenshotsBulk',
-        '/components/admin/EditCategoryFromSites',
-      ],
+      beforeList: ['/components/admin/SitesListToolbar'],
 
       edit: {
         beforeDocumentControls: [
@@ -29,12 +26,12 @@ export const Sites: CollectionConfig = {
     {
       name: 'Titre',
       type: 'text',
-      required: true,
+      required: false,
     },
     {
       name: 'siteUrl',
       type: 'text',
-      required: true,
+      required: false,
     },
     {
       name: 'desktopScreenshot',

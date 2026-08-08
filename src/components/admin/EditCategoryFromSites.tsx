@@ -161,7 +161,7 @@ export default function EditCategoryFromSites() {
   }
 
   return (
-    <div className="mb-[30px] flex w-full flex-wrap items-center gap-[10px] rounded-lg p-4 text-sm text-white gutter gutter--left gutter--right">
+    <div className="flex flex-wrap items-center gap-[10px] rounded-lg p-4 text-sm text-white gutter gutter--left gutter--right">
       <strong className="font-semibold text-white">Modifier les catégories</strong>
 
       <span className="text-accent-400">

@@ -135,7 +135,7 @@ export default function ScreenshotCapturePopover({ siteIds }: ScreenshotCaptureP
   }
 
   return (
-    <div className="gutter gutter--left gutter--right collection-list__wrap">
+    <div className="">
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger
           className=""

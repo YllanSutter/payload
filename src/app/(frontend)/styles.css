@@ -299,4 +299,8 @@ svg {
           -ms-overflow-style: none;  /* IE and Edge */
           scrollbar-width: none;  /* Firefox */
     }
+    .btn--style-sans
+    {
+      margin: 0!important;
+    }
   }

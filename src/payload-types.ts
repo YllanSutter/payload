@@ -153,8 +153,8 @@ export interface User {
 export interface Site {
   id: string;
   _order?: string | null;
-  Titre: string;
-  siteUrl: string;
+  Titre?: string | null;
+  siteUrl?: string | null;
   desktopScreenshot?: (string | null) | Media;
   mobileScreenshot?: (string | null) | Media;
   categories?: (string | Category)[] | null;
