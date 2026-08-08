@@ -12,7 +12,6 @@ services:
     command: sh -c "corepack enable && corepack prepare pnpm@latest --activate && pnpm install && pnpm dev"
     depends_on:
       - mongo
-      # - postgres
     env_file:
       - .env
 
@@ -32,6 +31,9 @@ services:
   # postgres:
   #   restart: always
   #   image: postgres:latest
+  #   environment:
+  #     POSTGRES_PASSWORD: postgres
+  #     POSTGRES_DB: payload
   #   volumes:
   #     - pgdata:/var/lib/postgresql/data
   #   ports:

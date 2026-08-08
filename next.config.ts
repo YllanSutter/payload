@@ -7,6 +7,8 @@ const __filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(__filename)
 
 const nextConfig: NextConfig = {
+  allowedDevOrigins: ['localhost', '127.0.0.1', '192.168.1.127'],
+
   images: {
     localPatterns: [
       {
@@ -14,6 +16,7 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+
   webpack: (webpackConfig) => {
     webpackConfig.resolve.extensionAlias = {
       '.cjs': ['.cts', '.cjs'],
@@ -23,9 +26,12 @@ const nextConfig: NextConfig = {
 
     return webpackConfig
   },
+
   turbopack: {
     root: path.resolve(dirname),
   },
 }
 
-export default withPayload(nextConfig, { devBundleServerPackages: false })
+export default withPayload(nextConfig, {
+  devBundleServerPackages: false,
+})
