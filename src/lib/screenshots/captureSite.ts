@@ -28,37 +28,31 @@ async function scrollToBottomAndBack(page: Page, delaySeconds: number) {
         window.setTimeout(resolve, milliseconds)
       })
 
-    const scrollStep = Math.max(Math.floor(window.innerHeight * 0.8), 300)
+    const pageHeight = Math.max(document.body.scrollHeight, document.documentElement.scrollHeight)
 
-    // Trois passages maximum pour déclencher le lazy-loading
-    for (let pass = 0; pass < 3; pass++) {
-      const pageHeight = Math.max(document.body.scrollHeight, document.documentElement.scrollHeight)
+    const maxScroll = Math.max(pageHeight - window.innerHeight, 0)
 
-      const maxScroll = Math.max(pageHeight - window.innerHeight, 0)
+    const numberOfSteps = 20
 
-      for (let position = 0; position < maxScroll; position += scrollStep) {
-        window.scrollTo({
-          top: Math.min(position, maxScroll),
-          behavior: 'instant',
-        })
-
-        await wait(200)
-      }
+    for (let step = 0; step <= numberOfSteps; step++) {
+      const position = (maxScroll * step) / numberOfSteps
 
       window.scrollTo({
-        top: maxScroll,
+        top: position,
         behavior: 'instant',
       })
 
-      await wait(800)
+      await wait(100)
     }
+
+    await wait(700)
 
     window.scrollTo({
       top: 0,
       behavior: 'instant',
     })
 
-    await wait(500)
+    await wait(300)
   })
 
   await page.waitForTimeout(delaySeconds * 1000)
@@ -66,11 +60,14 @@ async function scrollToBottomAndBack(page: Page, delaySeconds: number) {
 
 async function waitForImages(page: Page) {
   await page
-    .waitForFunction(() => Array.from(document.images).every((image) => image.complete), {
-      timeout: 15_000,
-    })
+    .waitForFunction(
+      () => Array.from(document.images).every((image) => image.complete || image.naturalWidth > 0),
+      {
+        timeout: 10_000,
+      },
+    )
     .catch(() => {
-      console.warn('Certaines images ne sont pas chargées après 15 secondes.')
+      console.warn('Certaines images ne sont pas disponibles. La capture continue.')
     })
 
   await page.waitForTimeout(500)
@@ -193,8 +190,8 @@ ${customCSS ?? ''}
     if (captureDesktop) {
       const desktopPage = await browser.newPage({
         viewport: {
-          width: 1440,
-          height: 900,
+          width: 1920,
+          height: 1080,
         },
         deviceScaleFactor: 1,
       })
@@ -203,7 +200,7 @@ ${customCSS ?? ''}
 
       await desktopPage.goto(normalizedURL, {
         waitUntil: 'networkidle',
-        timeout: 60_000,
+        timeout: 30_000,
       })
 
       await desktopPage.addStyleTag({
@@ -236,7 +233,7 @@ ${customCSS ?? ''}
 
       await mobilePage.goto(normalizedURL, {
         waitUntil: 'networkidle',
-        timeout: 60_000,
+        timeout: 30_000,
       })
 
       await mobilePage.addStyleTag({
@@ -244,7 +241,7 @@ ${customCSS ?? ''}
       })
 
       await scrollToBottomAndBack(mobilePage, delaySeconds)
-      await waitForImages(mobilePage)
+      // await waitForImages(mobilePage)
 
       mobileBuffer = await mobilePage.screenshot({
         type: 'png',

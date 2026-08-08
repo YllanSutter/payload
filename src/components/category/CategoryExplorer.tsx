@@ -192,7 +192,7 @@ export default function CategoryExplorer({ categories, sites }: CategoryExplorer
                     href={site.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="group overflow-hidden rounded-[2rem] border border-white/10 bg-zinc-950 transition duration-500 hover:-translate-y-1 hover:border-cyan-300/50"
+                    className="relative group overflow-hidden rounded-[2rem] border border-white/10 bg-zinc-950 transition duration-500 hover:-translate-y-1 hover:border-cyan-300/50"
                   >
                     {site.mobileScreenshot ? (
                       <img
