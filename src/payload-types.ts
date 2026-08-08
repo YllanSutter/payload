@@ -156,7 +156,10 @@ export interface Site {
   Titre: string;
   siteUrl: string;
   image?: (string | null) | Media;
+  desktopScreenshot?: (string | null) | Media;
+  mobileScreenshot?: (string | null) | Media;
   categories?: (string | Category)[] | null;
+  customCSS?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -305,7 +308,10 @@ export interface SitesSelect<T extends boolean = true> {
   Titre?: T;
   siteUrl?: T;
   image?: T;
+  desktopScreenshot?: T;
+  mobileScreenshot?: T;
   categories?: T;
+  customCSS?: T;
   updatedAt?: T;
   createdAt?: T;
 }
