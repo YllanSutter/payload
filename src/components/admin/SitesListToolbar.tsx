@@ -10,9 +10,11 @@ export default function SitesListToolbar() {
       <div className="sites-list-toolbar__actions">
         <BulkCreateSites />
 
-        <GenerateScreenshotsBulk />
+        <div className="flex mt-[20px] gap-4">
+          <GenerateScreenshotsBulk />
 
-        <EditCategoryFromSites />
+          <EditCategoryFromSites />
+        </div>
       </div>
     </div>
   )

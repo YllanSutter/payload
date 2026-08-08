@@ -104,13 +104,6 @@
   white-space: pre-wrap;
 }
 
-.sites-list-toolbar__actions
-{
-  display: flex;
-  align-items: center;
-  justify-items: flex-end;
-  gap: var(--base);
-}
 
 .sites-bulk-create__controls {
   display: flex;
@@ -131,4 +124,66 @@
 .sites-bulk-create__message {
   color: var(--theme-elevation-600);
   font-size: 13px;
+}
+.sites-bulk-create {
+  width: 100%;
+  margin: 0;
+}
+
+.sites-bulk-create__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--base);
+  margin-bottom: var(--base);
+}
+
+.sites-bulk-create__textarea {
+  display: block;
+  width: 100%;
+  min-height: 160px;
+  resize: vertical;
+  padding: var(--base);
+  border: 1px solid var(--theme-elevation-250);
+  border-radius: 3px;
+  background: var(--theme-input-bg);
+  color: var(--theme-text);
+  font-family: monospace;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.sites-bulk-create__textarea:focus {
+  border-color: var(--theme-success-500);
+  outline: none;
+}
+
+.sites-bulk-create__hint {
+  margin-top: calc(var(--base) / 2);
+  color: var(--theme-elevation-500);
+  font-size: 13px;
+}
+
+.sites-bulk-create .notice {
+  margin-top: var(--base);
+}
+
+.bulk-create-log {
+  margin-top: var(--base);
+}
+
+.bulk-create-log__content {
+  max-height: 220px;
+  overflow-y: auto;
+  margin: 0;
+  padding: var(--base);
+  border: 1px solid var(--theme-elevation-150);
+  border-radius: 3px;
+  background: var(--theme-elevation-50);
+  color: var(--theme-elevation-800);
+  font-family: monospace;
+  font-size: 12px;
+  line-height: 1.6;
+  white-space: pre-wrap;
 }
