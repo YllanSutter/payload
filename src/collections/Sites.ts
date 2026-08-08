@@ -11,10 +11,16 @@ export const Sites: CollectionConfig = {
   admin: {
     useAsTitle: 'Titre',
     components: {
-      beforeList: ['/components/admin/GenerateScreenshotsBulk'],
+      beforeList: [
+        '/components/admin/GenerateScreenshotsBulk',
+        '/components/admin/EditCategoryFromSites',
+      ],
 
       edit: {
-        beforeDocumentControls: ['/components/admin/GenerateScreenshotsButton'],
+        beforeDocumentControls: [
+          '/components/admin/GenerateScreenshotsButton',
+          '/components/admin/EditCategoryFromSites',
+        ],
       },
     },
   },

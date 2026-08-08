@@ -208,7 +208,7 @@ export default function CategoryExplorer({ categories, sites }: CategoryExplorer
 
                     <div className="relative aspect-[1.5] overflow-hidden bg-zinc-900 ">
                       {site.desktopScreenshot ? (
-                        <div className="h-full w-full object-cover transition duration-700 overflow-y-auto">
+                        <div className="h-full w-full object-cover transition duration-700 overflow-y-auto no-scrollbar">
                           <img
                             src={site.desktopScreenshot}
                             alt=""

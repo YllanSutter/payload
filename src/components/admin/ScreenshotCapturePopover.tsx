@@ -135,116 +135,123 @@ export default function ScreenshotCapturePopover({ siteIds }: ScreenshotCaptureP
   }
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger
-        render={
-          <button
-            type="button"
-            disabled={loading || ids.length === 0}
-            className="rounded-md bg-cyan-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-cyan-500 disabled:cursor-not-allowed disabled:bg-zinc-700"
-          />
-        }
-      >
-        {loading ? 'Génération en cours...' : 'Générer les captures'}
-      </PopoverTrigger>
-
-      <PopoverContent align="end" sideOffset={8} className="popoverContentCustom">
-        <div className="mb-4 flex items-center justify-between">
-          <div>
-            <h3 className="font-semibold">Paramètres de capture</h3>
-
-            <p className="mt-1 text-xs text-zinc-400">
-              {ids.length} site
-              {ids.length > 1 ? 's' : ''} sélectionné
-              {ids.length > 1 ? 's' : ''}
-            </p>
-          </div>
-
-          <button
-            type="button"
-            onClick={() => setOpen(false)}
-            className="text-xl leading-none text-zinc-400 hover:text-white close"
-            aria-label="Fermer"
-          >
-            ×
-          </button>
-        </div>
-
-        <label className="mb-4 block">
-          <span className="mb-1 block text-zinc-300">Délai après le scroll, en secondes</span>
-
-          <input
-            type="number"
-            min="0"
-            max="30"
-            step="1"
-            value={delaySeconds}
-            onChange={(event) => {
-              setDelaySeconds(Number(event.target.value))
-              setMessage('')
-            }}
-            disabled={loading}
-            className="w-full rounded-md border border-zinc-700 bg-zinc-900 px-3 py-2 text-white outline-none focus:border-cyan-500"
-          />
-        </label>
-
-        <div className="mb-5 space-y-3">
-          <label className="flex cursor-pointer items-center gap-3">
-            <input
-              type="checkbox"
-              checked={desktop}
-              onChange={(event) => {
-                setDesktop(event.target.checked)
-                setMessage('')
-              }}
-              disabled={loading}
-              className="h-4 w-4 accent-cyan-500"
+    <div className="gutter gutter--left gutter--right collection-list__wrap">
+      <Popover open={open} onOpenChange={setOpen}>
+        <PopoverTrigger
+          className=""
+          render={
+            <button
+              type="button"
+              disabled={loading || ids.length === 0}
+              className="rounded-md bg-cyan-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-cyan-500 disabled:cursor-not-allowed disabled:bg-zinc-700"
             />
-
-            <span>Capture desktop</span>
-          </label>
-
-          <label className="flex cursor-pointer items-center gap-3">
-            <input
-              type="checkbox"
-              checked={mobile}
-              onChange={(event) => {
-                setMobile(event.target.checked)
-                setMessage('')
-              }}
-              disabled={loading}
-              className="h-4 w-4 accent-cyan-500"
-            />
-
-            <span>Capture mobile</span>
-          </label>
-        </div>
-
-        <button
-          type="button"
-          onClick={generateScreenshots}
-          disabled={loading || ids.length === 0}
-          className="w-full rounded-md bg-cyan-600 px-3 py-2 font-medium text-white transition hover:bg-cyan-500 disabled:cursor-not-allowed disabled:bg-zinc-700"
+          }
         >
-          {loading ? 'Traitement en cours...' : 'Lancer la capture'}
-        </button>
+          {loading ? 'Génération en cours...' : 'Générer les captures'}
+        </PopoverTrigger>
 
-        {logs.length > 0 && (
-          <div className="mt-4 logs">
-            <p className="mb-2 text-xs font-semibold text-zinc-300">Journal de capture</p>
+        <PopoverContent
+          align="end"
+          sideOffset={8}
+          className="popoverContentCustom gutter gutter--left gutter--right"
+        >
+          <div className="mb-4 flex items-center justify-between">
+            <div>
+              <h3 className="font-semibold">Paramètres de capture</h3>
 
-            <div className="logsText max-h-48 overflow-y-auto rounded-md border border-zinc-800 bg-black p-3 font-mono text-[11px] leading-5 text-zinc-400">
-              {logs.map((log, index) => (
-                <div key={`${log}-${index}`}>{log}</div>
-              ))}
+              <p className="mt-1 text-xs text-zinc-400">
+                {ids.length} site
+                {ids.length > 1 ? 's' : ''} sélectionné
+                {ids.length > 1 ? 's' : ''}
+              </p>
             </div>
-          </div>
-        )}
 
-        {message && (
-          <p className="mt-3 border-t border-zinc-800 pt-3 text-xs text-zinc-400">{message}</p>
-        )}
-      </PopoverContent>
-    </Popover>
+            <button
+              type="button"
+              onClick={() => setOpen(false)}
+              className="text-xl leading-none text-zinc-400 hover:text-white close"
+              aria-label="Fermer"
+            >
+              ×
+            </button>
+          </div>
+
+          <label className="mb-4 block">
+            <span className="mb-1 block text-zinc-300">Délai après le scroll, en secondes</span>
+
+            <input
+              type="number"
+              min="0"
+              max="30"
+              step="1"
+              value={delaySeconds}
+              onChange={(event) => {
+                setDelaySeconds(Number(event.target.value))
+                setMessage('')
+              }}
+              disabled={loading}
+              className="w-full rounded-md border border-zinc-700 bg-zinc-900 px-3 py-2 text-white outline-none focus:border-cyan-500"
+            />
+          </label>
+
+          <div className="mb-5 space-y-3">
+            <label className="flex cursor-pointer items-center gap-3">
+              <input
+                type="checkbox"
+                checked={desktop}
+                onChange={(event) => {
+                  setDesktop(event.target.checked)
+                  setMessage('')
+                }}
+                disabled={loading}
+                className="h-4 w-4 accent-cyan-500"
+              />
+
+              <span>Capture desktop</span>
+            </label>
+
+            <label className="flex cursor-pointer items-center gap-3">
+              <input
+                type="checkbox"
+                checked={mobile}
+                onChange={(event) => {
+                  setMobile(event.target.checked)
+                  setMessage('')
+                }}
+                disabled={loading}
+                className="h-4 w-4 accent-cyan-500"
+              />
+
+              <span>Capture mobile</span>
+            </label>
+          </div>
+
+          <button
+            type="button"
+            onClick={generateScreenshots}
+            disabled={loading || ids.length === 0}
+            className="w-full rounded-md bg-cyan-600 px-3 py-2 font-medium text-white transition hover:bg-cyan-500 disabled:cursor-not-allowed disabled:bg-zinc-700"
+          >
+            {loading ? 'Traitement en cours...' : 'Lancer la capture'}
+          </button>
+
+          {logs.length > 0 && (
+            <div className="mt-4 logs">
+              <p className="mb-2 text-xs font-semibold text-zinc-300">Journal de capture</p>
+
+              <div className="logsText max-h-48 overflow-y-auto rounded-md border border-zinc-800 bg-black p-3 font-mono text-[11px] leading-5 text-zinc-400">
+                {logs.map((log, index) => (
+                  <div key={`${log}-${index}`}>{log}</div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {message && (
+            <p className="mt-3 border-t border-zinc-800 pt-3 text-xs text-zinc-400">{message}</p>
+          )}
+        </PopoverContent>
+      </Popover>
+    </div>
   )
 }
