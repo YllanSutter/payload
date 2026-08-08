@@ -3,13 +3,15 @@ import type { CollectionConfig } from 'payload'
 export const Sites: CollectionConfig = {
   slug: 'sites',
 
+  orderable: true,
+
   admin: {
     useAsTitle: 'Titre',
-    defaultColumns: ['Titre', 'siteUrl', 'image'],
-  },
+    defaultColumns: ['Titre', 'siteUrl', 'categories'],
 
-  access: {
-    read: () => true,
+    components: {
+      beforeList: ['/components/admin/EditCategoryFromSites'],
+    },
   },
 
   fields: [
@@ -20,16 +22,19 @@ export const Sites: CollectionConfig = {
     },
     {
       name: 'siteUrl',
-      label: 'Lien du site',
       type: 'text',
       required: true,
     },
     {
       name: 'image',
-      label: 'Image du site',
       type: 'upload',
       relationTo: 'media',
-      required: true,
+    },
+    {
+      name: 'categories',
+      type: 'relationship',
+      relationTo: 'categories',
+      hasMany: true,
     },
   ],
 }

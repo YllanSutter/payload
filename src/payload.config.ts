@@ -4,10 +4,12 @@ import path from 'path'
 import { buildConfig } from 'payload'
 import { fileURLToPath } from 'url'
 import sharp from 'sharp'
+import { nestedDocsPlugin } from '@payloadcms/plugin-nested-docs'
 
 import { Users } from './collections/Users'
 import { Sites } from './collections/Sites'
 import { Media } from './collections/Media'
+import { Category } from './collections/Category'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -15,11 +17,12 @@ const dirname = path.dirname(filename)
 export default buildConfig({
   admin: {
     user: Users.slug,
+
     importMap: {
       baseDir: path.resolve(dirname),
     },
   },
-  collections: [Users, Sites, Media],
+  collections: [Users, Sites, Category, Media],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',
   typescript: {
@@ -29,5 +32,9 @@ export default buildConfig({
     url: process.env.DATABASE_URL || '',
   }),
   sharp,
-  plugins: [],
+  plugins: [
+    nestedDocsPlugin({
+      collections: [],
+    }),
+  ],
 })

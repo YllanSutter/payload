@@ -69,6 +69,7 @@ export interface Config {
   collections: {
     users: User;
     sites: Site;
+    categories: Category;
     media: Media;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
@@ -79,6 +80,7 @@ export interface Config {
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
     sites: SitesSelect<false> | SitesSelect<true>;
+    categories: CategoriesSelect<false> | CategoriesSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -150,9 +152,11 @@ export interface User {
  */
 export interface Site {
   id: string;
+  _order?: string | null;
   Titre: string;
   siteUrl: string;
-  image: string | Media;
+  image?: (string | null) | Media;
+  categories?: (string | Category)[] | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -174,6 +178,19 @@ export interface Media {
   height?: number | null;
   focalX?: number | null;
   focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "categories".
+ */
+export interface Category {
+  id: string;
+  _order?: string | null;
+  Nom: string;
+  image: string | Media;
+  parents?: (string | Category)[] | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -206,6 +223,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'sites';
         value: string | Site;
+      } | null)
+    | ({
+        relationTo: 'categories';
+        value: string | Category;
       } | null)
     | ({
         relationTo: 'media';
@@ -280,9 +301,23 @@ export interface UsersSelect<T extends boolean = true> {
  * via the `definition` "sites_select".
  */
 export interface SitesSelect<T extends boolean = true> {
+  _order?: T;
   Titre?: T;
   siteUrl?: T;
   image?: T;
+  categories?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "categories_select".
+ */
+export interface CategoriesSelect<T extends boolean = true> {
+  _order?: T;
+  Nom?: T;
+  image?: T;
+  parents?: T;
   updatedAt?: T;
   createdAt?: T;
 }

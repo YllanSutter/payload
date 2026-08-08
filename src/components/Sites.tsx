@@ -67,8 +67,12 @@ export default function Sites({ sites }: SitesProps) {
 
               <div className="relative z-20 -mt-20 p-6">
                 <div className="mb-5">
-                  <p className="mb-2 text-xs uppercase tracking-[0.2em] text-cyan-300/80">
-                    Projet web
+                  <p className="mb-2 text-[10px] uppercase tracking-[0.2em] text-cyan-300/80">
+                    {site.categories?.length
+                      ? site.categories
+                          .map((cat) => (typeof cat === 'object' && cat !== null ? cat.Nom : ''))
+                          .join(', ')
+                      : 'Aucune catégorie'}
                   </p>
 
                   <h3 className="text-2xl font-semibold tracking-tight text-white">{site.Titre}</h3>
