@@ -34,7 +34,10 @@ export default function Sites({ sites }: SitesProps) {
 
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
         {sites.map((site) => {
-          const image = typeof site.image === 'object' && site.image !== null ? site.image : null
+          const desktopScreenshot =
+            typeof site.desktopScreenshot === 'object' && site.desktopScreenshot !== null
+              ? site.desktopScreenshot
+              : null
 
           return (
             <article
@@ -44,10 +47,10 @@ export default function Sites({ sites }: SitesProps) {
               <div className="absolute inset-0 z-10 bg-gradient-to-t from-black via-black/10 to-transparent opacity-80" />
 
               <div className="relative aspect-[4/3] overflow-hidden bg-zinc-900">
-                {image?.url ? (
+                {desktopScreenshot?.url ? (
                   <Image
-                    src={image.url}
-                    alt={image.alt || site.Titre}
+                    src={desktopScreenshot.url}
+                    alt={desktopScreenshot.alt || site.Titre}
                     fill
                     sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 33vw"
                     className="object-cover transition duration-700 ease-out group-hover:scale-110"

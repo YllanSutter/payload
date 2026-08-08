@@ -10,7 +10,8 @@ type Site = {
   id: string
   title: string
   url: string
-  imageUrl: string | null
+  desktopScreenshot: string | null
+  mobileScreenshot: string | null
   categoryIds: string[]
 }
 
@@ -117,7 +118,7 @@ export default function CategoryExplorer({ categories, sites }: CategoryExplorer
               <span className="text-sm text-zinc-600">{rootCategories.length} univers</span>
             </div>
 
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {rootCategories.map((category, index) => (
                 <CategoryCard
                   key={category.id}
@@ -139,7 +140,7 @@ export default function CategoryExplorer({ categories, sites }: CategoryExplorer
             </div>
 
             {childCategories.length > 0 ? (
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {childCategories.map((category, index) => {
                   const contextualSiteCount = sites.filter((site) => {
                     const belongsToParent = site.categoryIds.includes(selectedRoot.id)
@@ -193,20 +194,34 @@ export default function CategoryExplorer({ categories, sites }: CategoryExplorer
                     rel="noopener noreferrer"
                     className="group overflow-hidden rounded-[2rem] border border-white/10 bg-zinc-950 transition duration-500 hover:-translate-y-1 hover:border-cyan-300/50"
                   >
-                    <div className="relative aspect-[1.5] overflow-hidden bg-zinc-900">
-                      {site.imageUrl ? (
-                        <img
-                          src={site.imageUrl}
-                          alt=""
-                          className="h-full w-full object-cover transition duration-700 group-hover:scale-105"
-                        />
+                    {site.mobileScreenshot ? (
+                      <img
+                        src={site.mobileScreenshot}
+                        alt=""
+                        className="h-[100px] w-[80px] z-10 absolute bottom-5 right-5 object-cover transition duration-700"
+                      />
+                    ) : (
+                      <div className="flex h-full items-center justify-center text-5xl text-cyan-300/20">
+                        {site.title.charAt(0)}
+                      </div>
+                    )}
+
+                    <div className="relative aspect-[1.5] overflow-hidden bg-zinc-900 ">
+                      {site.desktopScreenshot ? (
+                        <div className="h-full w-full object-cover transition duration-700 overflow-y-auto">
+                          <img
+                            src={site.desktopScreenshot}
+                            alt=""
+                            className="h-full w-full object-cover transition duration-700"
+                          />
+                        </div>
                       ) : (
                         <div className="flex h-full items-center justify-center text-5xl text-cyan-300/20">
                           {site.title.charAt(0)}
                         </div>
                       )}
 
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent pointer-events-none" />
 
                       <span className="absolute bottom-5 left-5 text-xs uppercase tracking-[0.2em] text-cyan-200">
                         Ouvrir ↗

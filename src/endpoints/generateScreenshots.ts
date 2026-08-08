@@ -32,6 +32,17 @@ export const generateScreenshotsEndpoint: Endpoint = {
 
     const siteId = Array.isArray(rawId) ? String(rawId[0]) : String(rawId)
 
+    const body = (await req.json?.().catch(() => ({}))) as {
+      delaySeconds?: unknown
+    }
+
+    const requestedDelay = Number(body.delaySeconds ?? 2)
+
+    const delaySeconds = Math.min(
+      Math.max(Number.isFinite(requestedDelay) ? requestedDelay : 2, 0),
+      30,
+    )
+
     try {
       const site = await req.payload.findByID({
         collection: 'sites',
@@ -55,6 +66,7 @@ export const generateScreenshotsEndpoint: Endpoint = {
       const { desktopBuffer, mobileBuffer } = await captureSite({
         url: site.siteUrl,
         customCSS: site.customCSS,
+        delaySeconds,
       })
 
       const desktopMedia = await req.payload.create({

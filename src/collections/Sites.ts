@@ -10,10 +10,8 @@ export const Sites: CollectionConfig = {
 
   admin: {
     useAsTitle: 'Titre',
-    defaultColumns: ['Titre', 'siteUrl', 'desktopScreenshot', 'mobileScreenshot'],
-
     components: {
-      beforeList: ['/components/admin/EditCategoryFromSites'],
+      beforeList: ['/components/admin/GenerateScreenshotsBulk'],
 
       edit: {
         beforeDocumentControls: ['/components/admin/GenerateScreenshotsButton'],
@@ -31,12 +29,6 @@ export const Sites: CollectionConfig = {
       name: 'siteUrl',
       type: 'text',
       required: true,
-    },
-    {
-      name: 'image',
-      label: 'Miniature',
-      type: 'upload',
-      relationTo: 'media',
     },
     {
       name: 'desktopScreenshot',

@@ -4,3 +4,32 @@
 @import 'tailwindcss/utilities.css' layer(utilities);
 
 @source "../../components/admin";
+
+.popoverContentCustom
+{
+    background-color: #1a1a1a;
+    border:none;
+    padding: 3rem;
+}
+.popoverContentCustom .mb-4 {
+    margin-bottom: 1rem;
+}
+
+.popoverContentCustom button:not(.close){
+    margin-top: 0.5rem;
+}
+
+.close
+{
+    background: none;
+    border: none;
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    cursor: pointer;
+}
+
+.logsText
+{
+    padding: 1rem;
+}

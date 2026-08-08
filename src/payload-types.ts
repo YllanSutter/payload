@@ -155,7 +155,6 @@ export interface Site {
   _order?: string | null;
   Titre: string;
   siteUrl: string;
-  image?: (string | null) | Media;
   desktopScreenshot?: (string | null) | Media;
   mobileScreenshot?: (string | null) | Media;
   categories?: (string | Category)[] | null;
@@ -307,7 +306,6 @@ export interface SitesSelect<T extends boolean = true> {
   _order?: T;
   Titre?: T;
   siteUrl?: T;
-  image?: T;
   desktopScreenshot?: T;
   mobileScreenshot?: T;
   categories?: T;

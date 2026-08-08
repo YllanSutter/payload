@@ -48,7 +48,14 @@ export default async function HomePage() {
     id: String(site.id),
     title: site.Titre,
     url: site.siteUrl,
-    imageUrl: typeof site.image === 'object' && site.image?.url ? site.image.url : null,
+    mobileScreenshot:
+      typeof site.mobileScreenshot === 'object' && site.mobileScreenshot?.url
+        ? site.mobileScreenshot.url
+        : null,
+    desktopScreenshot:
+      typeof site.desktopScreenshot === 'object' && site.desktopScreenshot?.url
+        ? site.desktopScreenshot.url
+        : null,
     categoryIds: Array.isArray(site.categories)
       ? site.categories.map((category) => getId(category)).filter((id): id is string => Boolean(id))
       : [],
