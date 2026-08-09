@@ -45,21 +45,24 @@ export default async function HomePage() {
   }))
 
   const sites = rawSites
-    .filter((site): site is typeof site & { Titre: string; siteUrl: string } =>
-      Boolean(site.Titre && site.siteUrl),
-    )
+    .filter((site) => Boolean(site.Titre?.trim()) && Boolean(site.siteUrl?.trim()))
     .map((site) => ({
       id: String(site.id),
-      title: site.Titre,
-      url: site.siteUrl,
+
+      title: site.Titre?.trim() || 'Site sans titre',
+
+      url: site.siteUrl?.trim() || '',
+
       mobileScreenshot:
         typeof site.mobileScreenshot === 'object' && site.mobileScreenshot?.url
           ? site.mobileScreenshot.url
           : null,
+
       desktopScreenshot:
         typeof site.desktopScreenshot === 'object' && site.desktopScreenshot?.url
           ? site.desktopScreenshot.url
           : null,
+
       categoryIds: Array.isArray(site.categories)
         ? site.categories
             .map((category) => getId(category))
