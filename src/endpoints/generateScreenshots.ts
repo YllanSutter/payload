@@ -1,5 +1,4 @@
 import type { Endpoint } from 'payload'
-import { captureSite } from '@/lib/screenshots/captureSite'
 
 export const generateScreenshotsEndpoint: Endpoint = {
   path: '/:id/generate-screenshots',
@@ -62,6 +61,7 @@ export const generateScreenshotsEndpoint: Endpoint = {
           },
         )
       }
+      const { captureSite } = await import('@/lib/screenshots/captureSite')
 
       const { desktopBuffer, mobileBuffer } = await captureSite({
         url: site.siteUrl,
