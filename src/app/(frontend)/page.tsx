@@ -44,22 +44,28 @@ export default async function HomePage() {
       : [],
   }))
 
-  const sites = rawSites.map((site) => ({
-    id: String(site.id),
-    title: site.Titre,
-    url: site.siteUrl,
-    mobileScreenshot:
-      typeof site.mobileScreenshot === 'object' && site.mobileScreenshot?.url
-        ? site.mobileScreenshot.url
-        : null,
-    desktopScreenshot:
-      typeof site.desktopScreenshot === 'object' && site.desktopScreenshot?.url
-        ? site.desktopScreenshot.url
-        : null,
-    categoryIds: Array.isArray(site.categories)
-      ? site.categories.map((category) => getId(category)).filter((id): id is string => Boolean(id))
-      : [],
-  }))
+  const sites = rawSites
+    .filter((site): site is typeof site & { Titre: string; siteUrl: string } =>
+      Boolean(site.Titre && site.siteUrl),
+    )
+    .map((site) => ({
+      id: String(site.id),
+      title: site.Titre,
+      url: site.siteUrl,
+      mobileScreenshot:
+        typeof site.mobileScreenshot === 'object' && site.mobileScreenshot?.url
+          ? site.mobileScreenshot.url
+          : null,
+      desktopScreenshot:
+        typeof site.desktopScreenshot === 'object' && site.desktopScreenshot?.url
+          ? site.desktopScreenshot.url
+          : null,
+      categoryIds: Array.isArray(site.categories)
+        ? site.categories
+            .map((category) => getId(category))
+            .filter((id): id is string => Boolean(id))
+        : [],
+    }))
 
   const categoriesWithCounts = categories.map((category) => {
     const childCount = categories.filter((child) => child.parentIds.includes(category.id)).length
