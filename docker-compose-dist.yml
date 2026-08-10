@@ -64,7 +64,7 @@ services:
         pnpm install
 
         echo "Lancement de l'application..."
-        pnpm run dev
+        pnpm run dev:all-ln
 
   postgres:
     image: postgres:16-alpine
