@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { useSelection } from '@payloadcms/ui'
 
 type Category = {
-  id: string
+  id: number
   Nom: string
 }
 
@@ -30,13 +30,21 @@ function getSelectedIds(selection: unknown): string[] {
   return []
 }
 
-function getCategoryId(category: string | { id: string }): string | null {
+function getCategoryId(category: string | number | { id: string | number }): number | null {
   if (typeof category === 'string') {
+    const parsed = Number(category)
+
+    return Number.isNaN(parsed) ? null : parsed
+  }
+
+  if (typeof category === 'number') {
     return category
   }
 
   if (typeof category === 'object' && category !== null && 'id' in category) {
-    return String(category.id)
+    const parsed = Number(category.id)
+
+    return Number.isNaN(parsed) ? null : parsed
   }
 
   return null
@@ -85,14 +93,24 @@ export default function EditCategoryFromSites() {
       return
     }
 
-    const category = categories.find((item) => item.id === categoryId)
+    const selectedCategoryId = Number(categoryId)
+
+    if (Number.isNaN(selectedCategoryId)) {
+      setMessage('Choisis une catégorie.')
+      return
+    }
+
+    const category = categories.find((item) => item.id === selectedCategoryId)
+
+    if (!category) {
+      setMessage('La catégorie sélectionnée est introuvable.')
+      return
+    }
 
     const actionLabel = mode === 'add' ? 'ajouter' : 'retirer'
 
     const confirmed = window.confirm(
-      `${actionLabel.charAt(0).toUpperCase()}${actionLabel.slice(
-        1,
-      )} "${category?.Nom}" sur ${selectedIds.length} site(s) ?`,
+      `${actionLabel.charAt(0).toUpperCase()}${actionLabel.slice(1)} "${category.Nom}" sur ${selectedIds.length} site(s) ?`,
     )
 
     if (!confirmed) {
@@ -119,13 +137,15 @@ export default function EditCategoryFromSites() {
         const site = await siteResponse.json()
 
         const currentCategoryIds = Array.isArray(site.categories)
-          ? site.categories.map(getCategoryId).filter((id: any): id is string => Boolean(id))
+          ? site.categories
+              .map(getCategoryId)
+              .filter((id: number | null): id is number => id !== null)
           : []
 
         const nextCategoryIds =
           mode === 'add'
-            ? Array.from(new Set([...currentCategoryIds, categoryId]))
-            : currentCategoryIds.filter((id: string) => id !== categoryId)
+            ? Array.from(new Set([...currentCategoryIds, selectedCategoryId]))
+            : currentCategoryIds.filter((id: number) => id !== selectedCategoryId)
 
         const updateResponse = await fetch(`/api/sites/${siteId}`, {
           method: 'PATCH',
@@ -181,7 +201,7 @@ export default function EditCategoryFromSites() {
         <option value="">Choisir une catégorie</option>
 
         {categories.map((category) => (
-          <option key={category.id} value={category.id}>
+          <option key={category.id} value={String(category.id)}>
             {category.Nom}
           </option>
         ))}
