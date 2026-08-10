@@ -1,6 +1,6 @@
 services:
   payload:
-    image: node:20-alpine
+    image: node:20-bookworm
     working_dir: /home/node/app
     restart: unless-stopped
 
@@ -10,6 +10,7 @@ services:
     volumes:
       - .:/home/node/app
       - node_modules:/home/node/app/node_modules
+      - playwright_cache:/root/.cache/ms-playwright
 
     environment:
       NODE_ENV: development
@@ -31,37 +32,42 @@ services:
         set -eu
 
         echo "Installation de Git..."
-        apk add --no-cache git
+        apt-get update
+        apt-get install -y --no-install-recommends git ca-certificates
+        rm -rf /var/lib/apt/lists/*
 
         if [ ! -d .git ]; then
           echo "Repository absent, clonage depuis GitHub..."
 
           rm -rf /tmp/payload
 
-          git clone --depth 1 \
-            https://github.com/YllanSutter/payload.git \
+          git clone \
+            --depth 1 \
+            --branch "$BRANCH" \
+            "$REPOSITORY" \
             /tmp/payload
 
           echo "Copie du repository dans /home/node/app..."
           cp -a /tmp/payload/. /home/node/app/
         else
-          echo "Repository déjà présent."
+          echo "Repository présent, récupération des dernières modifications..."
+
+          git remote set-url origin "$REPOSITORY"
+          git fetch --depth 1 origin "$BRANCH"
+          git reset --hard "origin/$BRANCH"
         fi
+        echo "Nettoyage du cache Next.js..."
+        rm -rf .next
 
         echo "Activation de Corepack..."
         corepack enable
-
-        echo "Installation de pnpm 10..."
         corepack prepare pnpm@10 --activate
-
-        echo "Version de Node.js :"
-        node --version
-
-        echo "Version de pnpm :"
-        pnpm --version
 
         echo "Installation des dépendances..."
         pnpm install
+
+        echo "Installation de Chromium pour Playwright..."
+        pnpm exec playwright install --with-deps chromium
 
         echo "Lancement de l'application..."
         pnpm run dev
@@ -92,3 +98,4 @@ services:
 volumes:
   pgdata:
   node_modules:
+  playwright_cache:
