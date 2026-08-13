@@ -93,10 +93,10 @@ export default function CategoryExplorer({ categories, sites }: CategoryExplorer
           <div className="flex flex-col gap-10 md:flex-row md:items-end md:justify-between">
             <div className="max-w-2xl">
               <p className="font-mono text-[11px] uppercase tracking-[0.35em] text-[#e8490f]">
-                Catalogue · Édition 2026
+                Vitrine · Cekome
               </p>
               <h1 className="mt-5 font-serif text-[2.6rem] leading-[1.05] tracking-tight sm:text-6xl">
-                Notre sélection,{' '}
+                Notre sélection de sites,{' '}
                 <span className="italic text-[#1c1a15]/55 dark:text-[#ede8dc]/55">classée</span> par
                 univers.
               </h1>

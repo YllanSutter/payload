@@ -9,6 +9,7 @@ import { nestedDocsPlugin } from '@payloadcms/plugin-nested-docs'
 
 import { Users } from './collections/Users'
 import { Sites } from './collections/Sites'
+import { ScreenshotSettings } from './collections/ScreenshotsSettings'
 import { Media } from './collections/Media'
 import { Category } from './collections/Category'
 
@@ -18,12 +19,14 @@ const dirname = path.dirname(filename)
 export default buildConfig({
   admin: {
     user: Users.slug,
+    suppressHydrationWarning: true,
 
     importMap: {
       baseDir: path.resolve(dirname),
     },
   },
   collections: [Users, Sites, Category, Media],
+  globals: [ScreenshotSettings],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',
   typescript: {

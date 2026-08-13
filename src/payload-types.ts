@@ -91,8 +91,12 @@ export interface Config {
     defaultIDType: number;
   };
   fallbackLocale: null;
-  globals: {};
-  globalsSelect: {};
+  globals: {
+    'screenshot-settings': ScreenshotSetting;
+  };
+  globalsSelect: {
+    'screenshot-settings': ScreenshotSettingsSelect<false> | ScreenshotSettingsSelect<true>;
+  };
   locale: null;
   widgets: {
     collections: CollectionsWidget;
@@ -189,6 +193,7 @@ export interface Category {
   id: number;
   _order?: string | null;
   Nom: string;
+  isDefault?: boolean | null;
   image: number | Media;
   parents?: (number | Category)[] | null;
   updatedAt: string;
@@ -320,6 +325,7 @@ export interface SitesSelect<T extends boolean = true> {
 export interface CategoriesSelect<T extends boolean = true> {
   _order?: T;
   Nom?: T;
+  isDefault?: T;
   image?: T;
   parents?: T;
   updatedAt?: T;
@@ -382,6 +388,26 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
   batch?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "screenshot-settings".
+ */
+export interface ScreenshotSetting {
+  id: number;
+  baseCSS?: string | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "screenshot-settings_select".
+ */
+export interface ScreenshotSettingsSelect<T extends boolean = true> {
+  baseCSS?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

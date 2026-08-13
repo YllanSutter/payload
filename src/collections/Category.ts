@@ -20,6 +20,12 @@ export const Category: CollectionConfig = {
       required: true,
     },
     {
+      name: 'isDefault',
+      label: 'Catégorie par défaut',
+      type: 'checkbox',
+      defaultValue: false,
+    },
+    {
       name: 'image',
       type: 'upload',
       relationTo: 'media',

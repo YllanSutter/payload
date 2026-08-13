@@ -1,5 +1,39 @@
-import type { CollectionConfig } from 'payload'
+import type { CollectionBeforeValidateHook, CollectionConfig } from 'payload'
 import { generateScreenshotsEndpoint } from '@/endpoints/generateScreenshots'
+
+const applyDefaultCategories: CollectionBeforeValidateHook = async ({ data, operation, req }) => {
+  if (operation !== 'create') {
+    return data
+  }
+
+  const existingCategories = Array.isArray(data?.categories) ? data.categories : []
+
+  if (existingCategories.length > 0) {
+    return data
+  }
+
+  const defaultCategories = await req.payload.find({
+    collection: 'categories',
+    depth: 0,
+    limit: 100,
+    overrideAccess: false,
+    user: req.user,
+    where: {
+      isDefault: {
+        equals: true,
+      },
+    },
+  })
+
+  if (defaultCategories.docs.length === 0) {
+    return data
+  }
+
+  return {
+    ...data,
+    categories: defaultCategories.docs.map((category) => category.id),
+  }
+}
 
 export const Sites: CollectionConfig = {
   slug: 'sites',
@@ -7,6 +41,10 @@ export const Sites: CollectionConfig = {
   orderable: true,
 
   endpoints: [generateScreenshotsEndpoint],
+
+  hooks: {
+    beforeValidate: [applyDefaultCategories],
+  },
 
   admin: {
     useAsTitle: 'Titre',
@@ -47,6 +85,7 @@ export const Sites: CollectionConfig = {
     },
     {
       name: 'categories',
+      label: 'Catégories',
       type: 'relationship',
       relationTo: 'categories',
       hasMany: true,

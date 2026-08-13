@@ -1,5 +1,33 @@
 import type { Endpoint } from 'payload'
 
+function getScreenshotFileBase(siteUrl: string) {
+  const normalizedURL = siteUrl.trim().match(/^https?:\/\//i)
+    ? siteUrl.trim()
+    : `https://${siteUrl.trim()}`
+
+  const url = new URL(normalizedURL)
+  const hostname = url.hostname.replace(/^www\./i, '')
+  const parts = hostname.split('.').filter(Boolean)
+
+  const commonSecondLevelDomains = new Set(['co', 'com', 'net', 'org', 'gov', 'edu', 'ac'])
+
+  const baseParts =
+    parts.length > 2 &&
+    parts[parts.length - 1].length === 2 &&
+    commonSecondLevelDomains.has(parts[parts.length - 2].toLowerCase())
+      ? parts.slice(0, -2)
+      : parts.slice(0, -1)
+
+  const fallbackBase = baseParts.join('.') || hostname || 'screenshot'
+
+  return (
+    fallbackBase
+      .replace(/[^a-z0-9]+/gi, '-')
+      .replace(/^-+|-+$/g, '')
+      .toLowerCase() || 'screenshot'
+  )
+}
+
 export const generateScreenshotsEndpoint: Endpoint = {
   path: '/:id/generate-screenshots',
   method: 'post',
@@ -51,6 +79,13 @@ export const generateScreenshotsEndpoint: Endpoint = {
         user: req.user,
       })
 
+      const screenshotSettings = await req.payload.findGlobal({
+        slug: 'screenshot-settings',
+        depth: 0,
+        overrideAccess: false,
+        user: req.user,
+      })
+
       if (!site.siteUrl) {
         return Response.json(
           {
@@ -62,9 +97,11 @@ export const generateScreenshotsEndpoint: Endpoint = {
         )
       }
       const { captureSite } = await import('@/lib/screenshots/captureSite')
+      const screenshotFileBase = getScreenshotFileBase(site.siteUrl)
 
       const { desktopBuffer, mobileBuffer } = await captureSite({
         url: site.siteUrl,
+        baseCSS: screenshotSettings.baseCSS,
         customCSS: site.customCSS,
         delaySeconds,
       })
@@ -76,8 +113,8 @@ export const generateScreenshotsEndpoint: Endpoint = {
         },
         file: {
           data: desktopBuffer,
-          mimetype: 'image/png',
-          name: `${site.Titre}-desktop.png`,
+          mimetype: 'image/jpeg',
+          name: `${screenshotFileBase}.jpg`,
           size: desktopBuffer.length,
         },
         overrideAccess: false,
@@ -91,8 +128,8 @@ export const generateScreenshotsEndpoint: Endpoint = {
         },
         file: {
           data: mobileBuffer,
-          mimetype: 'image/png',
-          name: `${site.Titre}-mobile.png`,
+          mimetype: 'image/jpeg',
+          name: `${screenshotFileBase}-mobile.jpg`,
           size: mobileBuffer.length,
         },
         overrideAccess: false,
