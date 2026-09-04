@@ -50,6 +50,7 @@ export const Sites: CollectionConfig = {
     useAsTitle: 'Titre',
     components: {
       beforeList: ['/components/admin/SitesListToolbar'],
+      afterListTable: ['/components/admin/DownloadSelectedMedia'],
 
       edit: {
         beforeDocumentControls: [
