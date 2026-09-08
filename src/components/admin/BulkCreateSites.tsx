@@ -52,6 +52,10 @@ export default function BulkCreateSites() {
   const [logs, setLogs] = useState<string[]>([])
   const [captureAfterCreate, setCaptureAfterCreate] = useState(true)
   const [captureDelay, setCaptureDelay] = useState(2)
+  const [captureDesktop, setCaptureDesktop] = useState(true)
+  const [captureMobile, setCaptureMobile] = useState(true)
+  const [parallelCaptures, setParallelCaptures] = useState(2)
+  const urlCount = urls.split(/\r?\n/).filter((line) => line.trim()).length
 
   function addLog(message: string) {
     const time = new Date().toLocaleTimeString()
@@ -77,6 +81,11 @@ export default function BulkCreateSites() {
 
     if (lines.length > 100) {
       setMessage('Tu peux ajouter au maximum 100 sites à la fois.')
+      return
+    }
+
+    if (captureAfterCreate && !captureDesktop && !captureMobile) {
+      setMessage('Sélectionne au moins une version à capturer.')
       return
     }
 
@@ -108,6 +117,7 @@ export default function BulkCreateSites() {
 
     let created = 0
     let errors = 0
+    const sitesToCapture: { id: string; title: string }[] = []
 
     addLog(`Début de la création de ${sites.length} site(s).`)
 
@@ -143,43 +153,7 @@ export default function BulkCreateSites() {
         addLog(`Site créé : ${site.Titre}`)
 
         if (captureAfterCreate && createdSiteId) {
-          addLog(`Captures en cours pour ${site.Titre}...`)
-
-          try {
-            const captureResponse = await fetch(
-              `/api/sites/${createdSiteId}/generate-screenshots`,
-              {
-                method: 'POST',
-                credentials: 'include',
-                headers: {
-                  'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                  delaySeconds: captureDelay,
-                  desktop: true,
-                  mobile: true,
-                }),
-              },
-            )
-
-            const captureData = await captureResponse.json()
-
-            if (!captureResponse.ok) {
-              throw new Error(captureData?.error ?? 'Erreur pendant la génération des captures')
-            }
-
-            capturesCreated += 1
-
-            addLog(`Captures terminées : ${site.Titre}`)
-          } catch (error) {
-            captureErrors += 1
-
-            addLog(
-              `Erreur captures pour ${site.Titre} : ${
-                error instanceof Error ? error.message : 'Erreur inconnue'
-              }`,
-            )
-          }
+          sitesToCapture.push({ id: String(createdSiteId), title: site.Titre })
         }
 
         addLog(`Site créé : ${site.Titre}`)
@@ -192,27 +166,72 @@ export default function BulkCreateSites() {
           }`,
         )
       }
+    }
 
-      if (captureAfterCreate) {
-        setMessage(
-          `${created} site(s) créé(s), ${capturesCreated} capture(s) générée(s)${
-            captureErrors ? `, ${captureErrors} erreur(s) de capture` : ''
-          }.`,
+    let nextCaptureIndex = 0
+
+    async function captureOne(site: { id: string; title: string }) {
+      addLog(`Captures en cours pour ${site.title}...`)
+
+      try {
+        const captureResponse = await fetch(`/api/sites/${site.id}/generate-screenshots`, {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            delaySeconds: captureDelay,
+            desktop: captureDesktop,
+            mobile: captureMobile,
+          }),
+        })
+        const captureData = await captureResponse.json()
+
+        if (!captureResponse.ok) {
+          throw new Error(captureData?.error ?? 'Erreur pendant la génération des captures')
+        }
+
+        capturesCreated += 1
+        addLog(`Captures terminées : ${site.title}`)
+      } catch (error) {
+        captureErrors += 1
+        addLog(
+          `Erreur captures pour ${site.title} : ${
+            error instanceof Error ? error.message : 'Erreur inconnue'
+          }`,
         )
-      } else {
-        setMessage(`${created} site(s) créé(s) avec succès.`)
       }
+    }
+
+    async function captureWorker() {
+      while (nextCaptureIndex < sitesToCapture.length) {
+        const site = sitesToCapture[nextCaptureIndex++]
+        await captureOne(site)
+      }
+    }
+
+    if (sitesToCapture.length > 0) {
+      await Promise.all(
+        Array.from({ length: Math.min(parallelCaptures, sitesToCapture.length) }, captureWorker),
+      )
     }
 
     setLoading(false)
 
-    if (errors > 0) {
-      setMessage(`${created} site(s) créé(s), ${errors} erreur(s).`)
+    if (errors > 0 || captureErrors > 0) {
+      setMessage(
+        `${created} site(s) créé(s), ${capturesCreated} capture(s) générée(s), ${
+          errors + captureErrors
+        } erreur(s).`,
+      )
 
       return
     }
 
-    setMessage(`${created} site(s) créé(s) avec succès.`)
+    setMessage(
+      captureAfterCreate
+        ? `${created} site(s) créé(s), ${capturesCreated} capture(s) générée(s) avec succès.`
+        : `${created} site(s) créé(s) avec succès.`,
+    )
 
     window.setTimeout(() => {
       window.location.reload()
@@ -220,12 +239,14 @@ export default function BulkCreateSites() {
   }
 
   return (
-    <div className="sites-bulk-create">
+    <section className="sites-bulk-create">
       <div className="sites-bulk-create__header">
-        <div>
-          <h2 className="field-label">Ajouter plusieurs sites</h2>
-
-          <p className="field-description">Ajoute une URL par ligne.</p>
+        <div className="sites-bulk-create__title">
+          <span className="sites-bulk-create__mark">01</span>
+          <div>
+            <h2>Importer des sites</h2>
+            <p>Colle une adresse par ligne, puis crée ta sélection.</p>
+          </div>
         </div>
 
         <button
@@ -238,21 +259,29 @@ export default function BulkCreateSites() {
         </button>
       </div>
 
-      <textarea
-        value={urls}
-        onChange={(event) => {
-          setUrls(event.target.value)
-          setMessage('')
-        }}
-        disabled={loading}
-        placeholder={`www.ats-com.fr
-          https://www.mts68.fr
-          https://www.example.com`}
-        className="textarea sites-bulk-create__textarea"
-        rows={8}
-      />
-      <div className="sites-bulk-create__capture-options flex gap-[20px] mt-[10px]">
-        <label className="checkbox-input gap-[10px] ">
+      <div className="sites-bulk-create__input-area">
+        <div className="sites-bulk-create__input-label">
+          <span>Adresses des sites</span>
+          <span>
+            {urlCount} URL{urlCount > 1 ? 's' : ''}
+          </span>
+        </div>
+        <textarea
+          value={urls}
+          onChange={(event) => {
+            setUrls(event.target.value)
+            setMessage('')
+          }}
+          disabled={loading}
+          placeholder={`www.ats-com.fr
+https://www.mts68.fr
+https://www.example.com`}
+          className="textarea sites-bulk-create__textarea"
+          rows={8}
+        />
+      </div>
+      <div className="sites-bulk-create__capture-options">
+        <label className="sites-bulk-create__option sites-bulk-create__option--primary">
           <input
             type="checkbox"
             checked={captureAfterCreate}
@@ -264,24 +293,62 @@ export default function BulkCreateSites() {
         </label>
 
         {captureAfterCreate && (
-          <label className="sites-bulk-create__delay gap-[10px] flex">
-            <span className="field-label">Délai en secondes</span>
+          <>
+            <label className="sites-bulk-create__option">
+              <input
+                type="checkbox"
+                checked={captureDesktop}
+                onChange={(event) => setCaptureDesktop(event.target.checked)}
+                disabled={loading}
+              />
+              <span>Capture desktop</span>
+            </label>
 
-            <input
-              type="number"
-              min="0"
-              max="30"
-              value={captureDelay}
-              onChange={(event) => setCaptureDelay(Number(event.target.value))}
-              disabled={loading}
-              className="input"
-            />
-          </label>
+            <label className="sites-bulk-create__option">
+              <input
+                type="checkbox"
+                checked={captureMobile}
+                onChange={(event) => setCaptureMobile(event.target.checked)}
+                disabled={loading}
+              />
+              <span>Capture mobile</span>
+            </label>
+
+            <label className="sites-bulk-create__delay">
+              <span className="field-label">Délai en secondes</span>
+
+              <input
+                type="number"
+                min="0"
+                max="30"
+                value={captureDelay}
+                onChange={(event) => setCaptureDelay(Number(event.target.value))}
+                disabled={loading}
+                className="sites-bulk-create__control"
+              />
+            </label>
+
+            <label className="sites-bulk-create__delay">
+              <span className="field-label">Captures simultanées</span>
+
+              <select
+                value={parallelCaptures}
+                onChange={(event) => setParallelCaptures(Number(event.target.value))}
+                disabled={loading}
+                className="sites-bulk-create__control"
+              >
+                <option value={1}>1</option>
+                <option value={2}>2 (recommandé)</option>
+                <option value={3}>3</option>
+              </select>
+            </label>
+          </>
         )}
       </div>
 
       <p className="sites-bulk-create__hint">
-        Une URL par ligne. Le nom sera généré automatiquement depuis le domaine.
+        Les noms sont proposés à partir du domaine. Tu pourras les modifier directement dans le
+        tableau.
       </p>
 
       {message && <div className="notice notice--info">{message}</div>}
@@ -293,6 +360,6 @@ export default function BulkCreateSites() {
           <pre className="bulk-create-log__content">{logs.join('\n')}</pre>
         </div>
       )}
-    </div>
+    </section>
   )
 }

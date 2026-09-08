@@ -146,10 +146,7 @@ ${baseCSS ?? ''}
 ${customCSS ?? ''}
 `
 
-    let desktopBuffer: Buffer | null = null
-    let mobileBuffer: Buffer | null = null
-
-    if (captureDesktop) {
+    async function captureDesktopScreenshot() {
       const desktopPage = await browser.newPage({
         viewport: {
           width: 1920,
@@ -160,29 +157,22 @@ ${customCSS ?? ''}
 
       enableImageDebug(desktopPage, 'desktop')
 
-      await desktopPage.goto(normalizedURL, {
-        waitUntil: 'networkidle',
-        timeout: 30_000,
-      })
+      try {
+        await desktopPage.goto(normalizedURL, {
+          waitUntil: 'networkidle',
+          timeout: 30_000,
+        })
+        await desktopPage.addStyleTag({ content: css })
+        await scrollToBottomAndBack(desktopPage, delaySeconds)
+        await waitForImages(desktopPage)
 
-      await desktopPage.addStyleTag({
-        content: css,
-      })
-
-      await scrollToBottomAndBack(desktopPage, delaySeconds)
-      await waitForImages(desktopPage)
-
-      desktopBuffer = await desktopPage.screenshot({
-        type: 'png',
-        fullPage: true,
-      })
-
-      desktopBuffer = await resizeScreenshot(desktopBuffer)
-
-      await desktopPage.close()
+        return resizeScreenshot(await desktopPage.screenshot({ type: 'png', fullPage: true }))
+      } finally {
+        await desktopPage.close()
+      }
     }
 
-    if (captureMobile) {
+    async function captureMobileScreenshot() {
       const mobilePage = await browser.newPage({
         viewport: {
           width: 390,
@@ -195,27 +185,24 @@ ${customCSS ?? ''}
 
       enableImageDebug(mobilePage, 'mobile')
 
-      await mobilePage.goto(normalizedURL, {
-        waitUntil: 'networkidle',
-        timeout: 30_000,
-      })
+      try {
+        await mobilePage.goto(normalizedURL, {
+          waitUntil: 'networkidle',
+          timeout: 30_000,
+        })
+        await mobilePage.addStyleTag({ content: css })
+        await scrollToBottomAndBack(mobilePage, delaySeconds)
 
-      await mobilePage.addStyleTag({
-        content: css,
-      })
-
-      await scrollToBottomAndBack(mobilePage, delaySeconds)
-      // await waitForImages(mobilePage)
-
-      mobileBuffer = await mobilePage.screenshot({
-        type: 'png',
-        fullPage: false,
-      })
-
-      mobileBuffer = await resizeScreenshot(mobileBuffer)
-
-      await mobilePage.close()
+        return resizeScreenshot(await mobilePage.screenshot({ type: 'png', fullPage: false }))
+      } finally {
+        await mobilePage.close()
+      }
     }
+
+    const [desktopBuffer, mobileBuffer] = await Promise.all([
+      captureDesktop ? captureDesktopScreenshot() : Promise.resolve(null),
+      captureMobile ? captureMobileScreenshot() : Promise.resolve(null),
+    ])
 
     if (!desktopBuffer && !mobileBuffer) {
       throw new Error('Aucune capture n’a été générée')

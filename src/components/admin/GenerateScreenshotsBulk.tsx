@@ -25,7 +25,6 @@ function getSelectedIds(selection: unknown): string[] {
 
 export default function GenerateScreenshotsBulk() {
   const { selected, count } = useSelection()
-
   if (count === 0) {
     return null
   }

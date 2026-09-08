@@ -48,15 +48,13 @@ export const Sites: CollectionConfig = {
 
   admin: {
     useAsTitle: 'Titre',
+    defaultColumns: ['Titre', 'siteUrl', 'desktopScreenshot', 'mobileScreenshot', 'categories'],
     components: {
       beforeList: ['/components/admin/SitesListToolbar'],
       afterListTable: ['/components/admin/DownloadSelectedMedia'],
 
       edit: {
-        beforeDocumentControls: [
-          '/components/admin/GenerateScreenshotsButton',
-          '/components/admin/EditCategoryFromSites',
-        ],
+        beforeDocumentControls: ['/components/admin/GenerateScreenshotsButton'],
       },
     },
   },
@@ -66,23 +64,27 @@ export const Sites: CollectionConfig = {
       name: 'Titre',
       type: 'text',
       required: false,
+      admin: { components: { Cell: '/components/admin/InlineTextCell' } },
     },
     {
       name: 'siteUrl',
       type: 'text',
       required: false,
+      admin: { components: { Cell: '/components/admin/InlineTextCell' } },
     },
     {
       name: 'desktopScreenshot',
       label: 'Capture desktop',
       type: 'upload',
       relationTo: 'media',
+      admin: { components: { Cell: '/components/admin/InlineMediaCell' } },
     },
     {
       name: 'mobileScreenshot',
       label: 'Capture mobile',
       type: 'upload',
       relationTo: 'media',
+      admin: { components: { Cell: '/components/admin/InlineMediaCell' } },
     },
     {
       name: 'categories',
@@ -90,6 +92,7 @@ export const Sites: CollectionConfig = {
       type: 'relationship',
       relationTo: 'categories',
       hasMany: true,
+      admin: { components: { Cell: '/components/admin/InlineCategoriesCell' } },
     },
     {
       name: 'customCSS',

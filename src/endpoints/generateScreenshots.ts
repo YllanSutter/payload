@@ -61,6 +61,8 @@ export const generateScreenshotsEndpoint: Endpoint = {
 
     const body = (await req.json?.().catch(() => ({}))) as {
       delaySeconds?: unknown
+      desktop?: unknown
+      mobile?: unknown
     }
 
     const requestedDelay = Number(body.delaySeconds ?? 2)
@@ -69,6 +71,15 @@ export const generateScreenshotsEndpoint: Endpoint = {
       Math.max(Number.isFinite(requestedDelay) ? requestedDelay : 2, 0),
       30,
     )
+    const captureDesktop = body.desktop !== false
+    const captureMobile = body.mobile !== false
+
+    if (!captureDesktop && !captureMobile) {
+      return Response.json(
+        { error: 'Sélectionne au moins une version à capturer' },
+        { status: 400 },
+      )
+    }
 
     try {
       const site = await req.payload.findByID({
@@ -104,44 +115,50 @@ export const generateScreenshotsEndpoint: Endpoint = {
         baseCSS: screenshotSettings.baseCSS,
         customCSS: site.customCSS,
         delaySeconds,
+        captureDesktop,
+        captureMobile,
       })
 
-      const desktopMedia = await req.payload.create({
-        collection: 'media',
-        data: {
-          alt: `Capture desktop de ${site.Titre}`,
-        },
-        file: {
-          data: desktopBuffer,
-          mimetype: 'image/jpeg',
-          name: `${screenshotFileBase}.jpg`,
-          size: desktopBuffer.length,
-        },
-        overrideAccess: false,
-        user: req.user,
-      })
+      const desktopMedia = captureDesktop
+        ? await req.payload.create({
+            collection: 'media',
+            data: {
+              alt: `Capture desktop de ${site.Titre}`,
+            },
+            file: {
+              data: desktopBuffer,
+              mimetype: 'image/jpeg',
+              name: `${screenshotFileBase}.jpg`,
+              size: desktopBuffer.length,
+            },
+            overrideAccess: false,
+            user: req.user,
+          })
+        : null
 
-      const mobileMedia = await req.payload.create({
-        collection: 'media',
-        data: {
-          alt: `Capture mobile de ${site.Titre}`,
-        },
-        file: {
-          data: mobileBuffer,
-          mimetype: 'image/jpeg',
-          name: `${screenshotFileBase}-mobile.jpg`,
-          size: mobileBuffer.length,
-        },
-        overrideAccess: false,
-        user: req.user,
-      })
+      const mobileMedia = captureMobile
+        ? await req.payload.create({
+            collection: 'media',
+            data: {
+              alt: `Capture mobile de ${site.Titre}`,
+            },
+            file: {
+              data: mobileBuffer,
+              mimetype: 'image/jpeg',
+              name: `${screenshotFileBase}-mobile.jpg`,
+              size: mobileBuffer.length,
+            },
+            overrideAccess: false,
+            user: req.user,
+          })
+        : null
 
       const updatedSite = await req.payload.update({
         collection: 'sites',
         id: siteId,
         data: {
-          desktopScreenshot: desktopMedia.id,
-          mobileScreenshot: mobileMedia.id,
+          ...(desktopMedia ? { desktopScreenshot: desktopMedia.id } : {}),
+          ...(mobileMedia ? { mobileScreenshot: mobileMedia.id } : {}),
         },
         overrideAccess: false,
         user: req.user,
@@ -150,8 +167,8 @@ export const generateScreenshotsEndpoint: Endpoint = {
       return Response.json({
         success: true,
         site: updatedSite,
-        desktopScreenshot: desktopMedia.id,
-        mobileScreenshot: mobileMedia.id,
+        desktopScreenshot: desktopMedia?.id,
+        mobileScreenshot: mobileMedia?.id,
       })
     } catch (error) {
       console.error('Erreur génération captures:', error)

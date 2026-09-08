@@ -13,6 +13,7 @@ export default function ScreenshotCapturePopover({ siteIds }: ScreenshotCaptureP
   const [delaySeconds, setDelaySeconds] = useState(2)
   const [desktop, setDesktop] = useState(true)
   const [mobile, setMobile] = useState(true)
+  const [parallelCaptures, setParallelCaptures] = useState(2)
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState('')
   const [logs, setLogs] = useState<string[]>([])
@@ -57,8 +58,9 @@ export default function ScreenshotCapturePopover({ siteIds }: ScreenshotCaptureP
 
     let completed = 0
     let errors = 0
+    let nextIndex = 0
 
-    for (const [index, siteId] of ids.entries()) {
+    async function captureOne(index: number, siteId: string) {
       const currentNumber = index + 1
 
       addLog(`Site ${currentNumber}/${ids.length} : lancement de la requête.`)
@@ -116,6 +118,16 @@ export default function ScreenshotCapturePopover({ siteIds }: ScreenshotCaptureP
         }
       }
     }
+
+    async function worker() {
+      while (nextIndex < ids.length) {
+        const index = nextIndex++
+        await captureOne(index, ids[index])
+      }
+    }
+
+    const workerCount = Math.min(parallelCaptures, ids.length)
+    await Promise.all(Array.from({ length: workerCount }, worker))
 
     setLoading(false)
 
@@ -195,6 +207,8 @@ export default function ScreenshotCapturePopover({ siteIds }: ScreenshotCaptureP
           </label>
 
           <div className="mb-5 space-y-3">
+            <p className="text-sm font-medium text-zinc-200">Versions à générer</p>
+
             <label className="flex cursor-pointer items-center gap-3">
               <input
                 type="checkbox"
@@ -225,6 +239,23 @@ export default function ScreenshotCapturePopover({ siteIds }: ScreenshotCaptureP
               <span>Capture mobile</span>
             </label>
           </div>
+
+          {ids.length > 1 && (
+            <label className="mb-5 block">
+              <span className="mb-1 block text-zinc-300">Captures simultanées</span>
+
+              <select
+                value={parallelCaptures}
+                onChange={(event) => setParallelCaptures(Number(event.target.value))}
+                disabled={loading}
+                className="w-full rounded-md border border-zinc-700 bg-zinc-900 px-3 py-2 text-white outline-none focus:border-cyan-500"
+              >
+                <option value={1}>Une à la fois</option>
+                <option value={2}>Deux à la fois (recommandé)</option>
+                <option value={3}>Trois à la fois</option>
+              </select>
+            </label>
+          )}
 
           <button
             type="button"
