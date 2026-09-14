@@ -9,18 +9,14 @@ export default async function HomePage() {
   const payloadConfig = await config
   const payload = await getPayload({ config: payloadConfig })
 
-  const [{ docs: rawCategories }, { docs: rawSites }] = await Promise.all([
+  const [{ docs: rawCategories }, settings, siteCountResult] = await Promise.all([
     payload.find({
       collection: 'categories',
       limit: 1000,
       depth: 1,
     }),
-
-    payload.find({
-      collection: 'sites',
-      limit: 1000,
-      depth: 1,
-    }),
+    payload.findGlobal({ slug: 'settings', depth: 0 }),
+    payload.find({ collection: 'sites', depth: 0, limit: 1 }),
   ])
 
   const getId = (value: unknown): string | null => {
@@ -44,47 +40,36 @@ export default async function HomePage() {
       : [],
   }))
 
-  const sites = rawSites
-    .filter((site) => Boolean(site.Titre?.trim()) && Boolean(site.siteUrl?.trim()))
-    .map((site) => ({
-      id: String(site.id),
+  const categoriesWithCounts = await Promise.all(
+    categories.map(async (category) => {
+      const categorySites = await payload.find({
+        collection: 'sites',
+        depth: 0,
+        limit: 1,
+        where: {
+          categories: {
+            contains: category.id,
+          },
+        },
+      })
 
-      title: site.Titre?.trim() || 'Site sans titre',
-
-      url: site.siteUrl?.trim() || '',
-
-      mobileScreenshot:
-        typeof site.mobileScreenshot === 'object' && site.mobileScreenshot?.url
-          ? site.mobileScreenshot.url
-          : null,
-
-      desktopScreenshot:
-        typeof site.desktopScreenshot === 'object' && site.desktopScreenshot?.url
-          ? site.desktopScreenshot.url
-          : null,
-
-      categoryIds: Array.isArray(site.categories)
-        ? site.categories
-            .map((category) => getId(category))
-            .filter((id): id is string => Boolean(id))
-        : [],
-    }))
-
-  const categoriesWithCounts = categories.map((category) => {
     const childCount = categories.filter((child) => child.parentIds.includes(category.id)).length
+      const siteCount = categorySites.totalDocs
 
-    const siteCount = sites.filter((site) => site.categoryIds.includes(category.id)).length
+      return { ...category, childCount, siteCount }
+    }),
+  )
 
-    return {
-      ...category,
-      childCount,
-      siteCount,
-    }
-  })
+  const sitesPerCategory = Number(settings.sitesPerCategory) || 6
 
   return (
     <main>
-      <CategoryExplorer categories={categoriesWithCounts} sites={sites} />
+      <CategoryExplorer
+        categories={categoriesWithCounts}
+        sites={[]}
+        sitesPerCategory={sitesPerCategory}
+        totalSites={siteCountResult.totalDocs}
+      />
     </main>
   )
 }

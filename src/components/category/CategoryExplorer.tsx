@@ -5,7 +5,7 @@ import CategoryCard, {
   type CategoryCardData,
 } from '@/components/category/CategoryCard'
 import FilterBar from '@/components/filters/FilterBar'
-import { useMemo, useState, type ReactNode } from 'react'
+import { useEffect, useMemo, useState, type ReactNode } from 'react'
 
 const NOISE_TEXTURE =
   "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"
@@ -24,6 +24,8 @@ type Site = {
 type CategoryExplorerProps = {
   categories: Category[]
   sites: Site[]
+  sitesPerCategory: number
+  totalSites: number
 }
 
 function hostFromUrl(url: string) {
@@ -34,9 +36,43 @@ function hostFromUrl(url: string) {
   }
 }
 
-export default function CategoryExplorer({ categories, sites }: CategoryExplorerProps) {
+export default function CategoryExplorer({
+  categories,
+  sites,
+  sitesPerCategory,
+  totalSites,
+}: CategoryExplorerProps) {
   const [selectedRoot, setSelectedRoot] = useState<Category | null>(null)
   const [selectedChild, setSelectedChild] = useState<Category | null>(null)
+  const [loadedSites, setLoadedSites] = useState<Site[]>(sites)
+  const [sitesLoading, setSitesLoading] = useState(false)
+
+  useEffect(() => {
+    if (!selectedChild) {
+      setLoadedSites([])
+      return
+    }
+
+    const controller = new AbortController()
+    setSitesLoading(true)
+    setLoadedSites([])
+
+    fetch(`/api/sites/by-category?category=${encodeURIComponent(selectedChild.id)}`, {
+      signal: controller.signal,
+    })
+      .then(async (response) => {
+        if (!response.ok) throw new Error('Impossible de charger les sites')
+        return response.json() as Promise<{ docs: Site[] }>
+      })
+      .then((data) => setLoadedSites(data.docs))
+      .catch((error: unknown) => {
+        if (error instanceof DOMException && error.name === 'AbortError') return
+        setLoadedSites([])
+      })
+      .finally(() => setSitesLoading(false))
+
+    return () => controller.abort()
+  }, [selectedChild])
 
   function switchRoot(nextRoot: Category) {
     const childStillBelongsToRoot = selectedChild?.parentIds.includes(nextRoot.id)
@@ -61,12 +97,8 @@ export default function CategoryExplorer({ categories, sites }: CategoryExplorer
   const filteredSites = useMemo(() => {
     if (!selectedRoot || !selectedChild) return []
 
-    return sites.filter((site) => {
-      const hasRoot = site.categoryIds.includes(selectedRoot.id)
-      const hasChild = site.categoryIds.includes(selectedChild.id)
-      return hasRoot && hasChild
-    })
-  }, [sites, selectedRoot, selectedChild])
+    return loadedSites.filter((site) => site.categoryIds.includes(selectedChild.id))
+  }, [loadedSites, selectedRoot, selectedChild])
 
   function reset() {
     setSelectedRoot(null)
@@ -116,7 +148,7 @@ export default function CategoryExplorer({ categories, sites }: CategoryExplorer
                   Sites
                 </dt>
                 <dd className="mt-2 font-serif text-4xl">
-                  {String(sites.length).padStart(2, '0')}
+                  {String(totalSites).padStart(2, '0')}
                 </dd>
               </div>
             </dl>
@@ -176,20 +208,13 @@ export default function CategoryExplorer({ categories, sites }: CategoryExplorer
             {childCategories.length > 0 ? (
               <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
                 {childCategories.map((category, index) => {
-                  const contextualSiteCount = sites.filter((site) => {
-                    return (
-                      site.categoryIds.includes(selectedRoot.id) &&
-                      site.categoryIds.includes(category.id)
-                    )
-                  }).length
-
                   return (
                     <CategoryCard
                       key={category.id}
                       category={category}
                       index={index}
                       onSelect={setSelectedChild}
-                      countOverride={contextualSiteCount}
+                      countOverride={category.siteCount}
                     />
                   )
                 })}
@@ -215,7 +240,9 @@ export default function CategoryExplorer({ categories, sites }: CategoryExplorer
               meta={`${filteredSites.length} résultat${filteredSites.length > 1 ? 's' : ''}`}
             />
 
-            {filteredSites.length > 0 ? (
+            {sitesLoading ? (
+              <EmptyState title="Chargement" text={`Chargement de ${sitesPerCategory} site${sitesPerCategory > 1 ? 's' : ''} maximum…`} />
+            ) : filteredSites.length > 0 ? (
               <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
                 {filteredSites.map((site, index) => (
                   <SiteCard key={site.id} site={site} index={index} />
@@ -230,7 +257,7 @@ export default function CategoryExplorer({ categories, sites }: CategoryExplorer
         {/* ── Pied de page ────────────────────────────────────── */}
         <footer className="mt-20 flex flex-wrap items-center justify-between gap-3 border-t border-[#1c1a15]/15 pt-6 font-mono text-[10px] uppercase tracking-[0.25em] text-[#1c1a15]/40 dark:border-[#ede8dc]/15 dark:text-[#ede8dc]/40">
           <span>Fin de l'index</span>
-          <span>{String(sites.length).padStart(2, '0')} sites </span>
+          <span>{String(totalSites).padStart(2, '0')} sites </span>
         </footer>
       </div>
     </div>

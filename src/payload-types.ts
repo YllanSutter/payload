@@ -99,9 +99,11 @@ export interface Config {
   fallbackLocale: null;
   globals: {
     'screenshot-settings': ScreenshotSetting;
+    settings: Setting;
   };
   globalsSelect: {
     'screenshot-settings': ScreenshotSettingsSelect<false> | ScreenshotSettingsSelect<true>;
+    settings: SettingsSelect<false> | SettingsSelect<true>;
   };
   locale: null;
   widgets: {
@@ -669,10 +671,33 @@ export interface ScreenshotSetting {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "settings".
+ */
+export interface Setting {
+  id: number;
+  /**
+   * Nombre maximum de sites chargés lorsque l’on ouvre une sous-catégorie.
+   */
+  sitesPerCategory: number;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "screenshot-settings_select".
  */
 export interface ScreenshotSettingsSelect<T extends boolean = true> {
   baseCSS?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "settings_select".
+ */
+export interface SettingsSelect<T extends boolean = true> {
+  sitesPerCategory?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;

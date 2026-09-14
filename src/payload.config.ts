@@ -13,6 +13,7 @@ import { Sites } from './collections/Sites'
 import { ScreenshotSettings } from './collections/ScreenshotsSettings'
 import { Media } from './collections/Media'
 import { Category } from './collections/Category'
+import { Settings } from './collections/Settings'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -37,7 +38,7 @@ export default buildConfig({
     },
   },
   collections: [Users, Sites, Category, Media],
-  globals: [ScreenshotSettings],
+  globals: [ScreenshotSettings, Settings],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',
   typescript: {
