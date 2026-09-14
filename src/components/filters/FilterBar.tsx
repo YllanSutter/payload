@@ -34,7 +34,7 @@ const menuClasses =
   'max-h-[340px] w-64 overflow-y-auto rounded-xl border-[#1c1a15]/15 bg-[#fbf9f4] p-1.5 shadow-[0_24px_48px_-24px_rgba(28,26,21,0.35)] dark:border-[#ede8dc]/15 dark:bg-[#1b1814] dark:shadow-[0_24px_48px_-24px_rgba(0,0,0,0.8)]'
 
 const itemClasses =
-  'flex cursor-pointer items-center gap-2 rounded-lg px-3 py-2 font-mono text-[10px] uppercase tracking-[0.15em] text-[#1c1a15]/80 focus:bg-[#1c1a15]/5 focus:text-[#e8490f] dark:text-[#ede8dc]/80 dark:focus:bg-[#ede8dc]/10 dark:focus:text-[#e8490f]'
+  'flex cursor-pointer items-center gap-2 rounded-lg px-3 py-2 font-mono text-[10px] uppercase tracking-[0.15em] text-[#1c1a15]/80 focus:bg-[#1c1a15]/5 focus:text-[#ff008e] dark:text-[#ede8dc]/80 dark:focus:bg-[#ede8dc]/10 dark:focus:text-[#ff008e]'
 
 const headingClasses =
   'px-3 pb-1.5 pt-2 font-mono text-[9px] uppercase tracking-[0.3em] text-[#1c1a15]/40 dark:text-[#ede8dc]/40'
@@ -70,14 +70,14 @@ export default function FilterBar(props: FilterBarProps) {
             type="button"
             onClick={onReset}
             title="Revenir au départ"
-            className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-[#1c1a15]/25 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.18em] text-[#1c1a15]/60 transition-colors hover:border-[#e8490f] hover:text-[#e8490f] dark:border-[#ede8dc]/25 dark:text-[#ede8dc]/60"
+            className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-[#1c1a15]/25 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.18em] text-[#1c1a15]/60 transition-colors hover:border-[#ff008e] hover:text-[#ff008e] dark:border-[#ede8dc]/25 dark:text-[#ede8dc]/60"
           >
             ⌂ Index
           </button>
 
           <span className={slash}>/</span>
 
-          {/* Sélecteur d'univers */}
+          {/* Sélecteur de gamme */}
           <DropdownMenu>
             <DropdownMenuTrigger
               render={
@@ -87,17 +87,17 @@ export default function FilterBar(props: FilterBarProps) {
                     chipBase,
                     selectedRoot
                       ? 'border-[#1c1a15] bg-[#1c1a15] text-[#f4f1ea] hover:bg-[#1c1a15]/90 dark:border-[#ede8dc] dark:bg-[#ede8dc] dark:text-[#141210] dark:hover:bg-[#ede8dc]/90'
-                      : 'border-[#1c1a15]/30 text-[#1c1a15]/60 hover:border-[#e8490f] hover:text-[#e8490f] dark:border-[#ede8dc]/30 dark:text-[#ede8dc]/60',
+                      : 'border-[#1c1a15]/30 text-[#1c1a15]/60 hover:border-[#ff008e] hover:text-[#ff008e] dark:border-[#ede8dc]/30 dark:text-[#ede8dc]/60',
                   )}
                 />
               }
             >
-              <span className="truncate">{selectedRoot ? selectedRoot.name : 'Univers'}</span>
+              <span className="truncate">{selectedRoot ? selectedRoot.name : 'Gammes'}</span>
               <ChevronDown className="h-3 w-3 shrink-0 opacity-60 transition-transform duration-200 group-data-[popup-open]:rotate-180" />
             </DropdownMenuTrigger>
 
             <DropdownMenuContent align="start" className={menuClasses}>
-              <MenuHeading>Univers</MenuHeading>
+              <MenuHeading>Gammes</MenuHeading>
 
               {rootCategories.map((category) => {
                 const isSelected = selectedRoot?.id === category.id
@@ -112,7 +112,7 @@ export default function FilterBar(props: FilterBarProps) {
                     <span className="shrink-0 text-[#1c1a15]/40 dark:text-[#ede8dc]/40">
                       {String(category.childCount).padStart(2, '0')}
                     </span>
-                    {isSelected && <span className="shrink-0 text-[#e8490f]">✓</span>}
+                    {isSelected && <span className="shrink-0 text-[#ff008e]">✓</span>}
                   </DropdownMenuItem>
                 )
               })}
@@ -132,7 +132,7 @@ export default function FilterBar(props: FilterBarProps) {
                       chipBase,
                       selectedChild
                         ? 'border-[#1c1a15] bg-[#1c1a15] text-[#f4f1ea] hover:bg-[#1c1a15]/90 dark:border-[#ede8dc] dark:bg-[#ede8dc] dark:text-[#141210] dark:hover:bg-[#ede8dc]/90'
-                        : 'border-dashed border-[#1c1a15]/30 text-[#1c1a15]/50 hover:border-[#e8490f] hover:text-[#e8490f] dark:border-[#ede8dc]/30 dark:text-[#ede8dc]/50',
+                        : 'border-dashed border-[#1c1a15]/30 text-[#1c1a15]/50 hover:border-[#ff008e] hover:text-[#ff008e] dark:border-[#ede8dc]/30 dark:text-[#ede8dc]/50',
                     )}
                   />
                 }
@@ -146,7 +146,7 @@ export default function FilterBar(props: FilterBarProps) {
                   <>
                     <DropdownMenuItem
                       onClick={onChildReset}
-                      className={cn(itemClasses, 'text-[#e8490f] dark:text-[#e8490f]')}
+                      className={cn(itemClasses, 'text-[#ff008e] dark:text-[#ff008e]')}
                     >
                       ✕ Effacer le thème
                     </DropdownMenuItem>
@@ -170,7 +170,7 @@ export default function FilterBar(props: FilterBarProps) {
                         <span className="shrink-0 text-[#1c1a15]/40 dark:text-[#ede8dc]/40">
                           {String(category.siteCount).padStart(2, '0')}
                         </span>
-                        {isSelected && <span className="shrink-0 text-[#e8490f]">✓</span>}
+                        {isSelected && <span className="shrink-0 text-[#ff008e]">✓</span>}
                       </DropdownMenuItem>
                     )
                   })
@@ -198,7 +198,7 @@ export default function FilterBar(props: FilterBarProps) {
               variant="ghost"
               size="sm"
               onClick={onReset}
-              className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#1c1a15]/55 hover:bg-transparent hover:text-[#e8490f] dark:text-[#ede8dc]/55 dark:hover:bg-transparent dark:hover:text-[#e8490f]"
+              className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#1c1a15]/55 hover:bg-transparent hover:text-[#ff008e] dark:text-[#ede8dc]/55 dark:hover:bg-transparent dark:hover:text-[#ff008e]"
             >
               Réinitialiser ✕
             </Button>

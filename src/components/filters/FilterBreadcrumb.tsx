@@ -35,7 +35,7 @@ export default function FilterBreadcrumb({
               : 'border-white/15 text-zinc-400 hover:border-white/40 hover:text-white'
           }`}
         >
-          Tous les univers
+          Toutes les gammes
         </button>
 
         {rootCategories.map((root) => {

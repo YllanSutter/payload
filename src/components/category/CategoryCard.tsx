@@ -23,9 +23,9 @@ export function RootCategoryRow({ category, index, onSelect }: BaseCategoryProps
       type="button"
       onClick={() => onSelect(category)}
       style={{ animationDelay: `${index * 60}ms` }}
-      className="group grid w-full animate-in fade-in slide-in-from-bottom-2 fill-mode-both grid-cols-[auto_1fr_auto] items-center gap-4 px-2 py-5 text-left transition-colors duration-300 hover:bg-[#1c1a15]/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#e8490f] focus-visible:ring-offset-2 focus-visible:ring-offset-[#f4f1ea] sm:grid-cols-[auto_auto_1fr_auto] sm:gap-6 sm:px-3 sm:py-6 dark:hover:bg-[#ede8dc]/5 dark:focus-visible:ring-offset-[#141210]"
+      className="group grid w-full animate-in fade-in slide-in-from-bottom-2 fill-mode-both grid-cols-[auto_1fr_auto] items-center gap-4 px-2 py-5 text-left transition-colors duration-300 hover:bg-[#1c1a15]/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ff008e] focus-visible:ring-offset-2 focus-visible:ring-offset-[#f4f1ea] sm:grid-cols-[auto_auto_1fr_auto] sm:gap-6 sm:px-3 sm:py-6 dark:hover:bg-[#ede8dc]/5 dark:focus-visible:ring-offset-[#141210]"
     >
-      <span className="w-8 font-mono text-xs text-[#e8490f] sm:w-10">
+      <span className="w-8 font-mono text-xs text-[#ff008e] sm:w-10">
         {String(index + 1).padStart(2, '0')}
       </span>
 
@@ -35,7 +35,7 @@ export function RootCategoryRow({ category, index, onSelect }: BaseCategoryProps
           <img
             src={category.imageUrl}
             alt=""
-            className="h-full w-full object-cover grayscale transition duration-500 group-hover:scale-105 group-hover:grayscale-0"
+            className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
           />
         ) : (
           <span className="flex h-full items-center justify-center font-serif text-2xl italic text-[#1c1a15]/25 dark:text-[#ede8dc]/25">
@@ -55,7 +55,7 @@ export function RootCategoryRow({ category, index, onSelect }: BaseCategoryProps
       </span>
 
       {/* Flèche */}
-      <span className="flex h-10 w-10 items-center justify-center justify-self-end rounded-full border border-[#1c1a15]/25 text-sm transition-all duration-300 group-hover:border-[#e8490f] group-hover:bg-[#e8490f] group-hover:text-white dark:border-[#ede8dc]/25">
+      <span className="flex h-10 w-10 items-center justify-center justify-self-end rounded-full border border-[#1c1a15]/25 text-sm transition-all duration-300 group-hover:border-[#ff008e] group-hover:bg-[#ff008e] group-hover:text-white dark:border-[#ede8dc]/25">
         <span className="transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5">
           ↗
         </span>
@@ -88,7 +88,7 @@ export default function CategoryCard({
       type="button"
       onClick={() => onSelect(category)}
       style={{ animationDelay: `${index * 60}ms` }}
-      className="group flex h-full w-full animate-in fade-in fill-mode-both flex-col border border-[#1c1a15]/15 bg-[#fbf9f4] text-left transition-all duration-300 hover:-translate-y-1.5 hover:border-[#1c1a15] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#e8490f] focus-visible:ring-offset-2 focus-visible:ring-offset-[#f4f1ea] dark:border-[#ede8dc]/15 dark:bg-[#1b1814] dark:hover:border-[#ede8dc] dark:focus-visible:ring-offset-[#141210]"
+      className="group flex h-full w-full animate-in fade-in fill-mode-both flex-col border border-[#1c1a15]/15 bg-[#fbf9f4] text-left transition-all duration-300 hover:-translate-y-1.5 hover:border-[#1c1a15] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ff008e] focus-visible:ring-offset-2 focus-visible:ring-offset-[#f4f1ea] dark:border-[#ede8dc]/15 dark:bg-[#1b1814] dark:hover:border-[#ede8dc] dark:focus-visible:ring-offset-[#141210]"
     >
       {/* Image en haut, pleine largeur */}
       <span className="relative block aspect-[4/3] w-full overflow-hidden border-b border-[#1c1a15]/15 bg-[#e7e1d3] dark:border-[#ede8dc]/15 dark:bg-[#242019]">
@@ -96,7 +96,7 @@ export default function CategoryCard({
           <img
             src={category.imageUrl}
             alt=""
-            className="h-full w-full object-cover grayscale transition duration-700 group-hover:scale-[1.04] group-hover:grayscale-0"
+            className="h-full w-full object-cover transition duration-700 group-hover:scale-[1.04]"
           />
         ) : (
           <span className="flex h-full items-center justify-center font-serif text-6xl italic text-[#1c1a15]/15 dark:text-[#ede8dc]/15">
@@ -118,7 +118,7 @@ export default function CategoryCard({
             {count} {label}
           </span>
 
-          <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-[#e8490f] opacity-0 transition-all duration-300 group-hover:translate-x-1 group-hover:opacity-100">
+          <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-[#ff008e] opacity-0 transition-all duration-300 group-hover:translate-x-1 group-hover:opacity-100">
             Ouvrir →
           </span>
         </span>

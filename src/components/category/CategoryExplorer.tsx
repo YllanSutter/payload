@@ -74,10 +74,10 @@ export default function CategoryExplorer({ categories, sites }: CategoryExplorer
   }
 
   return (
-    <div className="min-h-screen bg-[#f4f1ea] text-[#1c1a15] antialiased selection:bg-[#e8490f] selection:text-white dark:bg-[#141210] dark:text-[#ede8dc]">
+    <div className="min-h-screen bg-[#f4f1ea] text-[#1c1a15] antialiased selection:bg-[#ff008e] selection:text-white dark:bg-[#141210] dark:text-[#ede8dc]">
       <div
         aria-hidden
-        className="pointer-events-none fixed inset-0 z-0 bg-[radial-gradient(55%_45%_at_82%_0%,rgba(232,73,15,0.07),transparent_70%)] dark:bg-[radial-gradient(55%_45%_at_82%_0%,rgba(232,73,15,0.12),transparent_70%)]"
+        className="pointer-events-none fixed inset-0 z-0 bg-[radial-gradient(55%_45%_at_82%_0%,#ff008e1f,transparent_70%)] dark:bg-[radial-gradient(55%_45%_at_82%_0%,#ff008e1f,transparent_70%)]"
       />
 
       {/* Grain par-dessus tout, façon impression */}
@@ -92,24 +92,20 @@ export default function CategoryExplorer({ categories, sites }: CategoryExplorer
         <header className="">
           <div className="flex flex-col gap-10 md:flex-row md:items-end md:justify-between">
             <div className="max-w-2xl">
-              <p className="font-mono text-[11px] uppercase tracking-[0.35em] text-[#e8490f]">
+              <p className="font-mono text-[11px] uppercase tracking-[0.35em] text-[#ff008e]">
                 Vitrine · Cekome
               </p>
               <h1 className="mt-5 font-serif text-[2.6rem] leading-[1.05] tracking-tight sm:text-6xl">
                 Notre sélection de sites,{' '}
-                <span className="italic text-[#1c1a15]/55 dark:text-[#ede8dc]/55">classée</span> par
-                univers.
+                <span className="italic text-[#ff008e]/55 dark:text-[#ff008e]/55">classée</span> par
+                gamme.
               </h1>
-              {/* <p className="mt-6 max-w-md text-sm leading-relaxed text-[#1c1a15]/60 dark:text-[#ede8dc]/60">
-                Un univers, un thème, puis les sites retenus. Chaque entrée est vérifiée à la main —
-                rien n'est référencé au hasard.
-              </p> */}
             </div>
 
             <dl className="flex shrink-0 gap-12">
               <div>
                 <dt className="font-mono text-[10px] uppercase tracking-[0.3em] text-[#1c1a15]/45 dark:text-[#ede8dc]/45">
-                  Univers
+                  Gamme
                 </dt>
                 <dd className="mt-2 font-serif text-4xl">
                   {String(rootCategories.length).padStart(2, '0')}
@@ -139,13 +135,13 @@ export default function CategoryExplorer({ categories, sites }: CategoryExplorer
           onChildReset={() => setSelectedChild(null)}
         />
 
-        {/* ── Étape 01 · Univers ──────────────────────────────── */}
+        {/* ── Étape 01 · Gammes ──────────────────────────────── */}
         {!selectedRoot && (
           <section className="animate-in fade-in slide-in-from-bottom-3 duration-500">
             <SectionHeading
               step="01"
               title="Choisis un point de départ"
-              meta={`${String(rootCategories.length).padStart(2, '0')} univers`}
+              meta={`${String(rootCategories.length).padStart(2, '0')} gammes`}
             />
 
             <div className="border-t border-[#1c1a15]/15 dark:border-[#ede8dc]/15">
@@ -201,7 +197,7 @@ export default function CategoryExplorer({ categories, sites }: CategoryExplorer
             ) : (
               <EmptyState
                 title="Aucun thème"
-                text="Cet univers ne propose pas encore de filtre secondaire."
+                text="Cette gamme ne propose pas encore de filtre secondaire."
               />
             )}
           </section>
@@ -234,7 +230,7 @@ export default function CategoryExplorer({ categories, sites }: CategoryExplorer
         {/* ── Pied de page ────────────────────────────────────── */}
         <footer className="mt-20 flex flex-wrap items-center justify-between gap-3 border-t border-[#1c1a15]/15 pt-6 font-mono text-[10px] uppercase tracking-[0.25em] text-[#1c1a15]/40 dark:border-[#ede8dc]/15 dark:text-[#ede8dc]/40">
           <span>Fin de l'index</span>
-          <span>{String(sites.length).padStart(2, '0')} sites référencés</span>
+          <span>{String(sites.length).padStart(2, '0')} sites </span>
         </footer>
       </div>
     </div>
@@ -248,7 +244,7 @@ function SectionHeading({ step, title, meta }: { step: string; title: ReactNode;
     <div className="mb-8">
       <div className="flex items-end justify-between gap-6">
         <div>
-          <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-[#e8490f]">
+          <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-[#ff008e]">
             Étape {step} / 03
           </p>
           <h2 className="mt-2 font-serif text-3xl tracking-tight sm:text-4xl">{title}</h2>
@@ -269,7 +265,7 @@ function SiteCard({ site, index }: { site: Site; index: number }) {
       target="_blank"
       rel="noopener noreferrer"
       style={{ animationDelay: `${Math.min(index * 60, 420)}ms` }}
-      className="group relative block animate-in fade-in fill-mode-both border border-[#1c1a15]/15 bg-[#fbf9f4] transition-all duration-300 hover:-translate-y-1.5 hover:border-[#1c1a15] hover:shadow-[0_24px_48px_-28px_rgba(28,26,21,0.45)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#e8490f] focus-visible:ring-offset-2 focus-visible:ring-offset-[#f4f1ea] dark:border-[#ede8dc]/15 dark:bg-[#1b1814] dark:hover:border-[#ede8dc] dark:hover:shadow-[0_24px_48px_-28px_rgba(0,0,0,0.85)] dark:focus-visible:ring-offset-[#141210]"
+      className="group relative block animate-in fade-in fill-mode-both border border-[#1c1a15]/15 bg-[#fbf9f4] transition-all duration-300 hover:-translate-y-1.5 hover:border-[#1c1a15] hover:shadow-[0_24px_48px_-28px_rgba(28,26,21,0.45)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ff008e] focus-visible:ring-offset-2 focus-visible:ring-offset-[#f4f1ea] dark:border-[#ede8dc]/15 dark:bg-[#1b1814] dark:hover:border-[#ede8dc] dark:hover:shadow-[0_24px_48px_-28px_rgba(0,0,0,0.85)] dark:focus-visible:ring-offset-[#141210]"
     >
       {/* Barre de navigateur */}
       <div className="flex items-center gap-1.5 border-b border-[#1c1a15]/10 px-4 py-2.5 dark:border-[#ede8dc]/10">
@@ -310,7 +306,7 @@ function SiteCard({ site, index }: { site: Site; index: number }) {
         )}
 
         {/* CTA */}
-        <span className="absolute bottom-3 left-3 translate-y-2 rounded-full bg-[#e8490f] px-3.5 py-1.5 font-mono text-[10px] uppercase tracking-[0.2em] text-white opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100">
+        <span className="absolute bottom-3 left-3 translate-y-2 rounded-full bg-[#ff008e] px-3.5 py-1.5 font-mono text-[10px] uppercase tracking-[0.2em] text-white opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100">
           Visiter ↗
         </span>
       </div>
@@ -318,7 +314,7 @@ function SiteCard({ site, index }: { site: Site; index: number }) {
       {/* Titre */}
       <div className="flex items-baseline justify-between gap-3 px-4 py-3.5 sm:px-5">
         <h3 className="truncate font-serif text-lg tracking-tight sm:text-xl">{site.title}</h3>
-        <span className="shrink-0 font-mono text-[10px] tracking-[0.2em] text-[#e8490f]">
+        <span className="shrink-0 font-mono text-[10px] tracking-[0.2em] text-[#ff008e]">
           {String(index + 1).padStart(2, '0')}
         </span>
       </div>
@@ -329,7 +325,7 @@ function SiteCard({ site, index }: { site: Site; index: number }) {
 function EmptyState({ title, text }: { title: string; text: string }) {
   return (
     <div className="border border-[#1c1a15]/15 bg-[#fbf9f4] px-8 py-16 text-center dark:border-[#ede8dc]/15 dark:bg-[#1b1814]">
-      <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-[#e8490f]">{title}</p>
+      <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-[#ff008e]">{title}</p>
       <p className="mx-auto mt-4 max-w-sm font-serif text-2xl italic text-[#1c1a15]/70 dark:text-[#ede8dc]/70">
         {text}
       </p>

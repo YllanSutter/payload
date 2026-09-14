@@ -3,6 +3,7 @@
 import BulkCreateSites from './BulkCreateSites'
 import GenerateScreenshotsBulk from './GenerateScreenshotsBulk'
 import EditCategoryFromSites from './EditCategoryFromSites'
+import ExportSitesArchive from './ExportSitesArchive'
 
 export default function SitesListToolbar() {
   return (
@@ -14,6 +15,7 @@ export default function SitesListToolbar() {
           <GenerateScreenshotsBulk />
 
           <EditCategoryFromSites />
+          <ExportSitesArchive />
         </div>
       </div>
     </div>

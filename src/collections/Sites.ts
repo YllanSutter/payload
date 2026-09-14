@@ -1,5 +1,6 @@
 import type { CollectionBeforeValidateHook, CollectionConfig } from 'payload'
 import { generateScreenshotsEndpoint } from '@/endpoints/generateScreenshots'
+import { exportSitesArchiveEndpoint } from '@/endpoints/exportSitesArchive'
 
 const applyDefaultCategories: CollectionBeforeValidateHook = async ({ data, operation, req }) => {
   if (operation !== 'create') {
@@ -40,7 +41,7 @@ export const Sites: CollectionConfig = {
 
   orderable: true,
 
-  endpoints: [generateScreenshotsEndpoint],
+  endpoints: [generateScreenshotsEndpoint, exportSitesArchiveEndpoint],
 
   hooks: {
     beforeValidate: [applyDefaultCategories],

@@ -6,6 +6,7 @@ import { buildConfig } from 'payload'
 import { fileURLToPath } from 'url'
 import sharp from 'sharp'
 import { nestedDocsPlugin } from '@payloadcms/plugin-nested-docs'
+import { importExportPlugin } from '@payloadcms/plugin-import-export'
 
 import { Users } from './collections/Users'
 import { Sites } from './collections/Sites'
@@ -55,6 +56,10 @@ export default buildConfig({
   plugins: [
     nestedDocsPlugin({
       collections: [],
+    }),
+    importExportPlugin({
+      collections: [{ slug: 'users' }, { slug: 'sites' }, { slug: 'media' }, { slug: 'categories' }],
+      // see below for a list of available options
     }),
   ],
 })
