@@ -26,7 +26,7 @@ export const getSitesByCategoryEndpoint: Endpoint = {
       collection: 'sites',
       depth: 1,
       limit,
-      sort: '-createdAt',
+      sort: '_order',
       where: {
         categories: {
           contains: categoryId,
