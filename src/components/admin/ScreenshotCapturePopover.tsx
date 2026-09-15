@@ -16,12 +16,21 @@ export default function ScreenshotCapturePopover({ siteIds }: ScreenshotCaptureP
   const [parallelCaptures, setParallelCaptures] = useState(2)
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState('')
-  const [logs, setLogs] = useState<string[]>([])
+  const [logs, setLogs] = useState<string[][]>([])
 
-  function addLog(message: string) {
+  function addLog(message: string, column = 0, columnCount = 1) {
     const time = new Date().toLocaleTimeString()
 
-    setLogs((currentLogs) => [...currentLogs, `[${time}] ${message}`])
+    setLogs((currentLogs) => {
+      const nextLogs =
+        currentLogs.length >= columnCount
+          ? currentLogs.map((columnLogs) => [...columnLogs])
+          : Array.from({ length: columnCount }, () => [])
+
+      nextLogs[column].push(`[${time}] ${message}`)
+
+      return nextLogs
+    })
   }
 
   const router = useRouter()
@@ -31,14 +40,6 @@ export default function ScreenshotCapturePopover({ siteIds }: ScreenshotCaptureP
   async function generateScreenshots() {
     setMessage('')
     setLogs([])
-    addLog(`Début de la capture pour ${ids.length} site(s).`)
-    addLog(
-      `Versions : ${desktop ? 'desktop' : ''}${desktop && mobile ? ' + ' : ''}${
-        mobile ? 'mobile' : ''
-      }`,
-    )
-    addLog(`Délai configuré : ${delaySeconds} seconde(s).`)
-
     if (!ids.length) {
       setMessage('Aucun site sélectionné.')
       return
@@ -59,11 +60,24 @@ export default function ScreenshotCapturePopover({ siteIds }: ScreenshotCaptureP
     let completed = 0
     let errors = 0
     let nextIndex = 0
+    const workerCount = Math.min(parallelCaptures, ids.length)
 
-    async function captureOne(index: number, siteId: string) {
+    setLogs([])
+    addLog(`Début de la capture pour ${ids.length} site(s).`, 0, workerCount)
+    addLog(
+      `Versions : ${desktop ? 'desktop' : ''}${desktop && mobile ? ' + ' : ''}${
+        mobile ? 'mobile' : ''
+      }`,
+      0,
+      workerCount,
+    )
+    addLog(`Délai configuré : ${delaySeconds} seconde(s).`, 0, workerCount)
+
+    async function captureOne(index: number, siteId: string, workerIndex: number) {
       const currentNumber = index + 1
 
-      addLog(`Site ${currentNumber}/${ids.length} : lancement de la requête.`)
+      addLog('--------------------', workerIndex, workerCount)
+      addLog(`Site ${currentNumber}/${ids.length} : lancement de la requête.`, workerIndex, workerCount)
 
       try {
         const controller = new AbortController()
@@ -75,7 +89,11 @@ export default function ScreenshotCapturePopover({ siteIds }: ScreenshotCaptureP
           8 * 60 * 1000,
         )
 
-        addLog(`Site ${currentNumber}/${ids.length} : navigateur en cours de préparation...`)
+        addLog(
+          `Site ${currentNumber}/${ids.length} : navigateur en cours de préparation...`,
+          workerIndex,
+          workerCount,
+        )
 
         const response = await fetch(`/api/sites/${siteId}/generate-screenshots`, {
           method: 'POST',
@@ -101,33 +119,38 @@ export default function ScreenshotCapturePopover({ siteIds }: ScreenshotCaptureP
 
         completed += 1
 
-        addLog(`Site ${currentNumber}/${ids.length} : captures enregistrées.`)
+        addLog(`Site ${currentNumber}/${ids.length} : captures enregistrées.`, workerIndex, workerCount)
 
         setMessage(`${completed}/${ids.length} site(s) traité(s)`)
       } catch (error) {
         errors += 1
 
         if (error instanceof DOMException && error.name === 'AbortError') {
-          addLog(`Site ${currentNumber}/${ids.length} : délai dépassé après 8 minutes.`)
+          addLog(
+            `Site ${currentNumber}/${ids.length} : délai dépassé après 8 minutes.`,
+            workerIndex,
+            workerCount,
+          )
         } else {
           addLog(
             `Site ${currentNumber}/${ids.length} : erreur — ${
               error instanceof Error ? error.message : 'Erreur inconnue'
             }`,
+            workerIndex,
+            workerCount,
           )
         }
       }
     }
 
-    async function worker() {
+    async function worker(workerIndex: number) {
       while (nextIndex < ids.length) {
         const index = nextIndex++
-        await captureOne(index, ids[index])
+        await captureOne(index, ids[index], workerIndex)
       }
     }
 
-    const workerCount = Math.min(parallelCaptures, ids.length)
-    await Promise.all(Array.from({ length: workerCount }, worker))
+    await Promise.all(Array.from({ length: workerCount }, (_, workerIndex) => worker(workerIndex)))
 
     setLoading(false)
 
@@ -267,12 +290,21 @@ export default function ScreenshotCapturePopover({ siteIds }: ScreenshotCaptureP
           </button>
 
           {logs.length > 0 && (
-            <div className="mt-4 logs">
+            <div className="mt-4 capture-logs">
               <p className="mb-2 text-xs font-semibold text-zinc-300">Journal de capture</p>
 
-              <div className="logsText max-h-48 overflow-y-auto rounded-md border border-zinc-800 bg-black p-3 font-mono text-[11px] leading-5 text-zinc-400">
-                {logs.map((log, index) => (
-                  <div key={`${log}-${index}`}>{log}</div>
+              <div className="capture-logs__columns">
+                {logs.map((columnLogs, columnIndex) => (
+                  <div className="capture-logs__column" key={columnIndex}>
+                    <p className="capture-logs__column-title">
+                      {logs.length > 1 ? `Worker ${columnIndex + 1}` : 'Progression'}
+                    </p>
+                    <div className="capture-logs__content">
+                      {columnLogs.map((log, logIndex) => (
+                        <div key={`${log}-${logIndex}`}>{log}</div>
+                      ))}
+                    </div>
+                  </div>
                 ))}
               </div>
             </div>

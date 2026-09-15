@@ -8,9 +8,7 @@ const applyDefaultCategories: CollectionBeforeValidateHook = async ({ data, oper
     return data
   }
 
-  const existingCategories = Array.isArray(data?.categories) ? data.categories : []
-
-  if (existingCategories.length > 0) {
+  if (Array.isArray(data?.categories)) {
     return data
   }
 

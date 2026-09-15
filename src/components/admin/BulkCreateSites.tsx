@@ -1,6 +1,12 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+
+type Category = {
+  id: number
+  Nom: string
+  isDefault?: boolean
+}
 
 function normalizeURL(value: string) {
   let url = value.trim()
@@ -47,9 +53,13 @@ function getSiteTitle(value: string) {
 
 export default function BulkCreateSites() {
   const [urls, setUrls] = useState('')
+  const [categories, setCategories] = useState<Category[]>([])
+  const [selectedCategoryIds, setSelectedCategoryIds] = useState<number[]>([])
+  const [categoriesLoading, setCategoriesLoading] = useState(true)
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState('')
   const [logs, setLogs] = useState<string[]>([])
+  const [captureLogs, setCaptureLogs] = useState<string[][]>([])
   const [captureAfterCreate, setCaptureAfterCreate] = useState(true)
   const [captureDelay, setCaptureDelay] = useState(2)
   const [captureDesktop, setCaptureDesktop] = useState(true)
@@ -57,10 +67,53 @@ export default function BulkCreateSites() {
   const [parallelCaptures, setParallelCaptures] = useState(2)
   const urlCount = urls.split(/\r?\n/).filter((line) => line.trim()).length
 
+  useEffect(() => {
+    async function loadCategories() {
+      try {
+        const response = await fetch('/api/categories?limit=1000&sort=Nom', {
+          credentials: 'include',
+        })
+
+        if (!response.ok) {
+          throw new Error('Impossible de charger les catégories.')
+        }
+
+        const data = await response.json()
+        const loadedCategories: Category[] = Array.isArray(data.docs) ? data.docs : []
+
+        setCategories(loadedCategories)
+        setSelectedCategoryIds(
+          loadedCategories.filter((category) => category.isDefault).map((category) => category.id),
+        )
+      } catch {
+        setMessage('Impossible de charger les catégories.')
+      } finally {
+        setCategoriesLoading(false)
+      }
+    }
+
+    loadCategories()
+  }, [])
+
   function addLog(message: string) {
     const time = new Date().toLocaleTimeString()
 
     setLogs((currentLogs) => [...currentLogs, `[${time}] ${message}`])
+  }
+
+  function addCaptureLog(message: string, column: number, columnCount: number) {
+    const time = new Date().toLocaleTimeString()
+
+    setCaptureLogs((currentLogs) => {
+      const nextLogs =
+        currentLogs.length >= columnCount
+          ? currentLogs.map((columnLogs) => [...columnLogs])
+          : Array.from({ length: columnCount }, () => [])
+
+      nextLogs[column].push(`[${time}] ${message}`)
+
+      return nextLogs
+    })
   }
 
   async function createSites() {
@@ -68,6 +121,7 @@ export default function BulkCreateSites() {
     let captureErrors = 0
     setMessage('')
     setLogs([])
+    setCaptureLogs([])
 
     const lines = urls
       .split(/\r?\n/)
@@ -81,6 +135,11 @@ export default function BulkCreateSites() {
 
     if (lines.length > 100) {
       setMessage('Tu peux ajouter au maximum 100 sites à la fois.')
+      return
+    }
+
+    if (categoriesLoading) {
+      setMessage('Chargement des catégories en cours...')
       return
     }
 
@@ -136,6 +195,7 @@ export default function BulkCreateSites() {
           body: JSON.stringify({
             Titre: site.Titre,
             siteUrl: site.siteUrl,
+            categories: selectedCategoryIds,
           }),
         })
 
@@ -150,13 +210,9 @@ export default function BulkCreateSites() {
 
         created += 1
 
-        addLog(`Site créé : ${site.Titre}`)
-
         if (captureAfterCreate && createdSiteId) {
           sitesToCapture.push({ id: String(createdSiteId), title: site.Titre })
         }
-
-        addLog(`Site créé : ${site.Titre}`)
       } catch (error) {
         errors += 1
 
@@ -169,9 +225,11 @@ export default function BulkCreateSites() {
     }
 
     let nextCaptureIndex = 0
+    const workerCount = Math.min(parallelCaptures, sitesToCapture.length)
 
-    async function captureOne(site: { id: string; title: string }) {
-      addLog(`Captures en cours pour ${site.title}...`)
+    async function captureOne(site: { id: string; title: string }, workerIndex: number) {
+      addCaptureLog('--------------------', workerIndex, workerCount)
+      addCaptureLog(`Captures en cours pour ${site.title}...`, workerIndex, workerCount)
 
       try {
         const captureResponse = await fetch(`/api/sites/${site.id}/generate-screenshots`, {
@@ -191,27 +249,29 @@ export default function BulkCreateSites() {
         }
 
         capturesCreated += 1
-        addLog(`Captures terminées : ${site.title}`)
+        addCaptureLog(`Captures terminées : ${site.title}`, workerIndex, workerCount)
       } catch (error) {
         captureErrors += 1
-        addLog(
+        addCaptureLog(
           `Erreur captures pour ${site.title} : ${
             error instanceof Error ? error.message : 'Erreur inconnue'
           }`,
+          workerIndex,
+          workerCount,
         )
       }
     }
 
-    async function captureWorker() {
+    async function captureWorker(workerIndex: number) {
       while (nextCaptureIndex < sitesToCapture.length) {
         const site = sitesToCapture[nextCaptureIndex++]
-        await captureOne(site)
+        await captureOne(site, workerIndex)
       }
     }
 
     if (sitesToCapture.length > 0) {
       await Promise.all(
-        Array.from({ length: Math.min(parallelCaptures, sitesToCapture.length) }, captureWorker),
+        Array.from({ length: workerCount }, (_, workerIndex) => captureWorker(workerIndex)),
       )
     }
 
@@ -252,10 +312,10 @@ export default function BulkCreateSites() {
         <button
           type="button"
           onClick={createSites}
-          disabled={loading}
+          disabled={loading || categoriesLoading}
           className="btn btn--style-primary"
         >
-          {loading ? 'Création en cours...' : 'Créer les sites'}
+          {loading ? 'Création en cours...' : categoriesLoading ? 'Chargement...' : 'Créer les sites'}
         </button>
       </div>
 
@@ -279,6 +339,40 @@ https://www.example.com`}
           className="textarea sites-bulk-create__textarea"
           rows={8}
         />
+      </div>
+      <div className="sites-bulk-create__categories">
+        <div className="sites-bulk-create__categories-header">
+          <span className="field-label">Catégories</span>
+          <span>{selectedCategoryIds.length} sélectionnée(s)</span>
+        </div>
+
+        {categories.length > 0 ? (
+          <div className="sites-bulk-create__category-list">
+            {categories.map((category) => {
+              const categoryId = category.id
+
+              return (
+                <label key={String(categoryId)} className="sites-bulk-create__option">
+                  <input
+                    type="checkbox"
+                    checked={selectedCategoryIds.includes(categoryId)}
+                    onChange={(event) => {
+                      setSelectedCategoryIds((currentIds) =>
+                        event.target.checked
+                          ? Array.from(new Set([...currentIds, categoryId]))
+                          : currentIds.filter((id) => id !== categoryId),
+                      )
+                    }}
+                    disabled={loading || categoriesLoading}
+                  />
+                  <span>{category.Nom}</span>
+                </label>
+              )
+            })}
+          </div>
+        ) : (
+          <p className="sites-bulk-create__categories-empty">Aucune catégorie disponible.</p>
+        )}
       </div>
       <div className="sites-bulk-create__capture-options">
         <label className="sites-bulk-create__option sites-bulk-create__option--primary">
@@ -358,6 +452,27 @@ https://www.example.com`}
           <p className="field-label">Journal de création</p>
 
           <pre className="bulk-create-log__content">{logs.join('\n')}</pre>
+        </div>
+      )}
+
+      {captureLogs.length > 0 && (
+        <div className="bulk-create-log capture-log">
+          <p className="field-label">Journal des captures</p>
+
+          <div className="capture-logs__columns">
+            {captureLogs.map((columnLogs, columnIndex) => (
+              <div className="capture-logs__column" key={columnIndex}>
+                <p className="capture-logs__column-title">
+                  {captureLogs.length > 1 ? `Worker ${columnIndex + 1}` : 'Progression'}
+                </p>
+                <div className="capture-logs__content">
+                  {columnLogs.map((log, logIndex) => (
+                    <div key={`${log}-${logIndex}`}>{log}</div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       )}
     </section>
