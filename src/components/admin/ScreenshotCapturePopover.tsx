@@ -8,6 +8,13 @@ type ScreenshotCapturePopoverProps = {
   siteIds: string[]
 }
 
+type CustomCSSPreset = {
+  id?: string
+  title: string
+  css: string
+  isDefault?: boolean | null
+}
+
 export default function ScreenshotCapturePopover({ siteIds }: ScreenshotCapturePopoverProps) {
   const [open, setOpen] = useState(false)
   const [delaySeconds, setDelaySeconds] = useState(2)
@@ -17,6 +24,9 @@ export default function ScreenshotCapturePopover({ siteIds }: ScreenshotCaptureP
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState('')
   const [logs, setLogs] = useState<string[][]>([])
+  const [customCSSPresets, setCustomCSSPresets] = useState<CustomCSSPreset[]>([])
+  const [selectedCustomCSSPresetIds, setSelectedCustomCSSPresetIds] = useState<string[]>([])
+  const [loadingCustomCSSPresets, setLoadingCustomCSSPresets] = useState(false)
 
   function addLog(message: string, column = 0, columnCount = 1) {
     const time = new Date().toLocaleTimeString()
@@ -36,6 +46,39 @@ export default function ScreenshotCapturePopover({ siteIds }: ScreenshotCaptureP
   const router = useRouter()
 
   const ids = siteIds.filter(Boolean)
+
+  async function loadCustomCSSPresets() {
+    setLoadingCustomCSSPresets(true)
+
+    try {
+      const response = await fetch('/api/globals/screenshot-settings?depth=0', {
+        credentials: 'include',
+      })
+      const data = (await response.json()) as { customCSSPresets?: CustomCSSPreset[] }
+
+      if (!response.ok) {
+        throw new Error('Impossible de charger les CSS personnalisés')
+      }
+
+      const presets = Array.isArray(data.customCSSPresets) ? data.customCSSPresets : []
+      setCustomCSSPresets(presets)
+      setSelectedCustomCSSPresetIds(
+        presets.flatMap((preset) => (preset.isDefault && preset.id ? [preset.id] : [])),
+      )
+    } catch {
+      setMessage('Impossible de charger les CSS personnalisés.')
+    } finally {
+      setLoadingCustomCSSPresets(false)
+    }
+  }
+
+  function handleOpenChange(nextOpen: boolean) {
+    setOpen(nextOpen)
+
+    if (nextOpen && customCSSPresets.length === 0 && !loadingCustomCSSPresets) {
+      void loadCustomCSSPresets()
+    }
+  }
 
   async function generateScreenshots() {
     setMessage('')
@@ -105,6 +148,7 @@ export default function ScreenshotCapturePopover({ siteIds }: ScreenshotCaptureP
             delaySeconds,
             desktop,
             mobile,
+            customCSSPresetIds: selectedCustomCSSPresetIds,
           }),
           signal: controller.signal,
         })
@@ -171,7 +215,7 @@ export default function ScreenshotCapturePopover({ siteIds }: ScreenshotCaptureP
 
   return (
     <div className="">
-      <Popover open={open} onOpenChange={setOpen}>
+      <Popover open={open} onOpenChange={handleOpenChange}>
         <PopoverTrigger
           className=""
           render={
@@ -279,6 +323,57 @@ export default function ScreenshotCapturePopover({ siteIds }: ScreenshotCaptureP
               </select>
             </label>
           )}
+
+          <div className="mb-5 space-y-3">
+            <p className="text-sm font-medium text-zinc-200">CSS personnalisés</p>
+
+            <p className="text-xs text-zinc-400">
+              Le CSS personnalisé déjà enregistré sur le site est toujours inclus.
+            </p>
+
+            {loadingCustomCSSPresets && (
+              <p className="text-xs text-zinc-400">Chargement des CSS disponibles...</p>
+            )}
+
+            {!loadingCustomCSSPresets && customCSSPresets.length === 0 && (
+              <p className="text-xs text-zinc-400">
+                Aucun CSS personnalisé configuré dans les réglages screenshots.
+              </p>
+            )}
+
+            {!loadingCustomCSSPresets && customCSSPresets.length > 0 && (
+              <div className="space-y-2">
+                {customCSSPresets.map((preset) => {
+                  if (!preset.id) {
+                    return null
+                  }
+
+                  const checked = selectedCustomCSSPresetIds.includes(preset.id)
+
+                  return (
+                    <label className="flex cursor-pointer items-center gap-3" key={preset.id}>
+                      <input
+                        type="checkbox"
+                        checked={checked}
+                        onChange={(event) => {
+                          setSelectedCustomCSSPresetIds((currentIds) =>
+                            event.target.checked
+                              ? [...currentIds, preset.id as string]
+                              : currentIds.filter((id) => id !== preset.id),
+                          )
+                          setMessage('')
+                        }}
+                        disabled={loading}
+                        className="h-4 w-4 accent-cyan-500"
+                      />
+
+                      <span>{preset.title}</span>
+                    </label>
+                  )
+                })}
+              </div>
+            )}
+          </div>
 
           <button
             type="button"

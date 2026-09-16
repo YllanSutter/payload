@@ -5,10 +5,18 @@ export const ScreenshotSettings: GlobalConfig = {
 
   fields: [
     {
-      name: 'baseCSS',
-      label: 'CSS global des captures',
-      type: 'code',
-      defaultValue: `html, body {
+      name: 'customCSSPresets',
+      label: 'Presets CSS disponibles à la capture',
+      type: 'array',
+      labels: {
+        singular: 'preset CSS personnalisé',
+        plural: 'presets CSS personnalisés',
+      },
+      defaultValue: [
+        {
+          title: 'CSS global des captures',
+          isDefault: true,
+          css: `html, body {
   overflow-x: hidden !important;
   width: 100% !important;
   max-width: 100% !important;
@@ -62,8 +70,32 @@ export const ScreenshotSettings: GlobalConfig = {
   opacity: 0;
 }
 `,
+        },
+      ],
+      fields: [
+        {
+          name: 'title',
+          label: 'Titre',
+          type: 'text',
+          required: true,
+        },
+        {
+          name: 'css',
+          label: 'CSS',
+          type: 'textarea',
+          required: true,
+        },
+        {
+          name: 'isDefault',
+          label: 'Actif par défaut',
+          type: 'checkbox',
+          defaultValue: false,
+        },
+      ],
       admin: {
-        language: 'css',
+        components: {
+          RowLabel: '/components/admin/CustomCSSPresetRowLabel',
+        },
       },
     },
   ],

@@ -8,6 +8,12 @@ type Category = {
   isDefault?: boolean
 }
 
+type CustomCSSPreset = {
+  id: string
+  title: string
+  isDefault?: boolean | null
+}
+
 function normalizeURL(value: string) {
   let url = value.trim()
 
@@ -56,6 +62,9 @@ export default function BulkCreateSites() {
   const [categories, setCategories] = useState<Category[]>([])
   const [selectedCategoryIds, setSelectedCategoryIds] = useState<number[]>([])
   const [categoriesLoading, setCategoriesLoading] = useState(true)
+  const [customCSSPresets, setCustomCSSPresets] = useState<CustomCSSPreset[]>([])
+  const [selectedCustomCSSPresetIds, setSelectedCustomCSSPresetIds] = useState<string[]>([])
+  const [customCSSPresetsLoading, setCustomCSSPresetsLoading] = useState(true)
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState('')
   const [logs, setLogs] = useState<string[]>([])
@@ -93,6 +102,40 @@ export default function BulkCreateSites() {
     }
 
     loadCategories()
+  }, [])
+
+  useEffect(() => {
+    async function loadCustomCSSPresets() {
+      try {
+        const response = await fetch('/api/globals/screenshot-settings?depth=0', {
+          credentials: 'include',
+        })
+
+        if (!response.ok) {
+          throw new Error('Impossible de charger les presets CSS.')
+        }
+
+        const data = await response.json()
+        const loadedPresets: CustomCSSPreset[] = Array.isArray(data.customCSSPresets)
+          ? data.customCSSPresets.filter(
+              (preset: CustomCSSPreset) => preset.id && preset.title,
+            )
+          : []
+
+        setCustomCSSPresets(loadedPresets)
+        setSelectedCustomCSSPresetIds(
+          loadedPresets
+            .filter((preset) => preset.isDefault)
+            .map((preset) => preset.id),
+        )
+      } catch {
+        setMessage('Impossible de charger les presets CSS.')
+      } finally {
+        setCustomCSSPresetsLoading(false)
+      }
+    }
+
+    void loadCustomCSSPresets()
   }, [])
 
   function addLog(message: string) {
@@ -196,6 +239,7 @@ export default function BulkCreateSites() {
             Titre: site.Titre,
             siteUrl: site.siteUrl,
             categories: selectedCategoryIds,
+            customCSSPresetIds: selectedCustomCSSPresetIds,
           }),
         })
 
@@ -240,6 +284,7 @@ export default function BulkCreateSites() {
             delaySeconds: captureDelay,
             desktop: captureDesktop,
             mobile: captureMobile,
+            customCSSPresetIds: selectedCustomCSSPresetIds,
           }),
         })
         const captureData = await captureResponse.json()
@@ -436,6 +481,38 @@ https://www.example.com`}
                 <option value={3}>3</option>
               </select>
             </label>
+
+            <div className="sites-bulk-create__presets">
+              <span className="field-label">Presets CSS personnalisés</span>
+
+              {customCSSPresetsLoading && <span>Chargement...</span>}
+
+              {!customCSSPresetsLoading && customCSSPresets.length === 0 && (
+                <span>Aucun preset configuré.</span>
+              )}
+
+              {!customCSSPresetsLoading && customCSSPresets.length > 0 && (
+                <div className="sites-bulk-create__preset-list">
+                  {customCSSPresets.map((preset) => (
+                    <label className="sites-bulk-create__option" key={preset.id}>
+                      <input
+                        type="checkbox"
+                        checked={selectedCustomCSSPresetIds.includes(preset.id)}
+                        onChange={(event) => {
+                          setSelectedCustomCSSPresetIds((currentIds) =>
+                            event.target.checked
+                              ? [...currentIds, preset.id]
+                              : currentIds.filter((id) => id !== preset.id),
+                          )
+                        }}
+                        disabled={loading}
+                      />
+                      <span>{preset.title}</span>
+                    </label>
+                  ))}
+                </div>
+              )}
+            </div>
           </>
         )}
       </div>

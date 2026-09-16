@@ -102,5 +102,15 @@ export const Sites: CollectionConfig = {
         language: 'css',
       },
     },
+    {
+      name: 'customCSSPresetIds',
+      label: 'Presets CSS personnalisés pour la capture',
+      type: 'json',
+      admin: {
+        components: {
+          Field: '/components/admin/CustomCSSPresetsField',
+        },
+      },
+    },
   ],
 }

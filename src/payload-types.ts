@@ -178,6 +178,15 @@ export interface Site {
   mobileScreenshot?: (number | null) | Media;
   categories?: (number | Category)[] | null;
   customCSS?: string | null;
+  customCSSPresetIds?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -496,6 +505,7 @@ export interface SitesSelect<T extends boolean = true> {
   mobileScreenshot?: T;
   categories?: T;
   customCSS?: T;
+  customCSSPresetIds?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -665,7 +675,14 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
  */
 export interface ScreenshotSetting {
   id: number;
-  baseCSS?: string | null;
+  customCSSPresets?:
+    | {
+        title: string;
+        css: string;
+        isDefault?: boolean | null;
+        id?: string | null;
+      }[]
+    | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -687,7 +704,14 @@ export interface Setting {
  * via the `definition` "screenshot-settings_select".
  */
 export interface ScreenshotSettingsSelect<T extends boolean = true> {
-  baseCSS?: T;
+  customCSSPresets?:
+    | T
+    | {
+        title?: T;
+        css?: T;
+        isDefault?: T;
+        id?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;

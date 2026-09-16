@@ -23,16 +23,25 @@ export default function InlineTextCell({ cellData, field, rowData }: DefaultCell
 
   if (!editing) {
     return (
-      <button
-        className="site-inline-text"
-        type="button"
-        onClick={(event) => {
-          event.stopPropagation()
-          setEditing(true)
-        }}
-      >
-        {value || '—'}
-      </button>
+      <div className="site-inline-text-wrap" onClick={(event) => event.stopPropagation()}>
+        <button
+          className="site-inline-text"
+          type="button"
+          onClick={() => setEditing(true)}
+        >
+          {value || '—'}
+        </button>
+        {fieldName === 'Titre' && (
+          <a
+            className="site-inline-open"
+            href={`/admin/collections/sites/${rowData.id}`}
+            title="Ouvrir la fiche du site"
+            aria-label="Ouvrir la fiche du site"
+          >
+            ↗
+          </a>
+        )}
+      </div>
     )
   }
 

@@ -63,6 +63,7 @@ export const generateScreenshotsEndpoint: Endpoint = {
       delaySeconds?: unknown
       desktop?: unknown
       mobile?: unknown
+      customCSSPresetIds?: unknown
     }
 
     const requestedDelay = Number(body.delaySeconds ?? 2)
@@ -97,6 +98,29 @@ export const generateScreenshotsEndpoint: Endpoint = {
         user: req.user,
       })
 
+      const requestedPresetIds = Array.isArray(body.customCSSPresetIds)
+        ? body.customCSSPresetIds.map(String)
+        : []
+      const sitePresetIds = Array.isArray(site.customCSSPresetIds)
+        ? site.customCSSPresetIds.map(String)
+        : []
+      const customCSSPresets = Array.isArray(screenshotSettings.customCSSPresets)
+        ? screenshotSettings.customCSSPresets
+        : []
+      const defaultPresetIds = customCSSPresets
+        .filter((preset) => preset.isDefault && preset.id)
+        .map((preset) => String(preset.id))
+      const selectedPresetIds = new Set([
+        ...defaultPresetIds,
+        ...sitePresetIds,
+        ...requestedPresetIds,
+      ])
+      const selectedCustomCSS = customCSSPresets
+        .filter((preset) => preset.id && selectedPresetIds.has(String(preset.id)))
+        .map((preset) => preset.css)
+        .filter(Boolean)
+        .join('\n')
+
       if (!site.siteUrl) {
         return Response.json(
           {
@@ -112,8 +136,7 @@ export const generateScreenshotsEndpoint: Endpoint = {
 
       const { desktopBuffer, mobileBuffer } = await captureSite({
         url: site.siteUrl,
-        baseCSS: screenshotSettings.baseCSS,
-        customCSS: site.customCSS,
+        customCSS: [site.customCSS, selectedCustomCSS].filter(Boolean).join('\n'),
         delaySeconds,
         captureDesktop,
         captureMobile,
