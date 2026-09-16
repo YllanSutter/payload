@@ -59,7 +59,32 @@ export default buildConfig({
       collections: [],
     }),
     importExportPlugin({
-      collections: [{ slug: 'users' }, { slug: 'sites' }, { slug: 'media' }, { slug: 'categories' }],
+      collections: [
+        {
+          slug: 'categories',
+          import: {
+            disableJobsQueue: true,
+          },
+        },
+        {
+          slug: 'media',
+          import: {
+            disableJobsQueue: true,
+          },
+        },
+        {
+          slug: 'sites',
+          import: {
+            disableJobsQueue: true,
+          },
+        },
+        {
+          slug: 'users',
+          import: {
+            disableJobsQueue: true,
+          },
+        },
+      ],
       // see below for a list of available options
     }),
   ],

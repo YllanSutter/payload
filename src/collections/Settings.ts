@@ -3,6 +3,13 @@ import type { GlobalConfig } from 'payload'
 export const Settings: GlobalConfig = {
   slug: 'settings',
   label: 'Paramètres',
+  admin: {
+    components: {
+      elements: {
+        beforeDocumentControls: ['/components/admin/ImportExportSettingsLinks'],
+      },
+    },
+  },
   fields: [
     {
       name: 'sitesPerCategory',
